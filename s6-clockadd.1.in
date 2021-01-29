@@ -1,0 +1,54 @@
+.Dd January 29, 2021
+.Dt S6-CLOCKADD 1
+.Os
+.Sh NAME
+.Nm s6-clockadd
+.Nd adjust the system clock depending on the input provided by a time client
+.Sh SYNOPSIS
+.Nm
+.Op Fl f
+.Op Fl e Ar errmax
+.Sh DESCRIPTION
+.Nm
+reads its stdin, expecting input from a program such as
+.Xr s6-taiclock 1
+or
+.Xr s6-sntpclock 1
+(which get time from a time server).
+.Pp
+It sets the system clock so the system time becomes the one given by
+the server.
+Then it exits 0.
+.Pp
+.Nm
+must be run as root.
+The client getting the time from a time server, however, does not have
+to.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl f
+Force.
+Normally,
+.Nm
+exits 1 if the time discrepancy read from stdin is bigger than
+.Ar errmax
+milliseconds.
+If this option is set, it will print a warning message,
+but still set the system time and exit 0.
+.It Fl e Ar errmax
+Accept a maximum time discrepancy of
+.Ar errmax
+milliseconds.
+By default,
+.Ar errmax
+is 2000.
+.El
+.Sh SEE ALSO
+.Xr s6-sntpclock 1 ,
+.Xr s6-taiclock 1
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6-networking/s6-clockadd.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

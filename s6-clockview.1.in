@@ -1,0 +1,27 @@
+.Dd January 29, 2021
+.Dt S6-CLOCKVIEW 1
+.Os
+.Sh NAME
+.Nm s6-clockview
+.Nd print the time discrepancy between the local system clock and the time provided by a time server
+.Sh SYNOPSIS
+.Nm
+.Sh DESCRIPTION
+.Nm
+reads its stdin, expecting input from a program such as
+.Xr s6-taiclock 1
+or
+.Xr s6-sntpclock 1
+(which get time from a time server).
+.Pp
+It prints the local system time, and the time given by the server, in
+human-readable form, then exits 0.
+.Sh SEE ALSO
+.Xr s6-sntpclock 1 ,
+.Xr s6-taiclock 1
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6-networking/s6-clockview.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)
