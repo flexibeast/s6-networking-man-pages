@@ -1,0 +1,156 @@
+.Dd January 30, 2021
+.Dt S6-TAICLOCK 1
+.Os
+.Sh NAME
+.Nm s6-taiclock
+.Nd client for the TAICLOCK[1] protocol
+.Sh SYNOPSIS
+.Nm
+.Op Fl f
+.Op Fl v Ar verbosity
+.Op Fl r Ar roundtrips
+.Op Fl t Ar triptimeout
+.Op Fl h Ar throttle
+.Op Fl T Ar totaltimeout
+.Op Fl e Ar errmax
+.Op Fl p Ar port
+.Ar ipaddress
+.Sh DESCRIPTION
+.Nm
+connects to a TAICLOCK server, computes an estimated discrepancy
+between the local clock time and the absolute time given by the server,
+and outputs it on stdout.
+.Pp
+.Nm
+exchanges TAICLOCK messages with a server such as
+.Xr s6-taiclockd 1
+listening on
+.Ar ipaddress ,
+UDP port 4014.
+.Ar ipaddress
+can be IPv4 or IPv6.
+.Pp
+It computes the mean difference between the absolute time given by the
+system clock and the one given by the server.
+.Pp
+It prints the difference to stdout in a format understood
+by
+.Xr s6-clockadd 1
+and
+.Xr s6-clockview 1 .
+It then exits 0.
+.Ss On the usage of NTP vs. TAICLOCK
+TAICLOCK is not as generic or failproof as NTP.
+It is not as resistant to network latency.
+It has been designed to broadcast time on a local area network,
+whereas NTP has been designed to broadcast time over the whole
+Internet.
+.Pp
+TAICLOCK will produce faster results on a LAN; moreover, the point of
+TAICLOCK is to broadcast TAI instead of UTC, so it is more accurate
+around a leap second.
+.Pp
+The Internet is much more reliable latency-wise today than it was when
+dialout connections and broken routing protocols were the norm.
+So it is possible to use TAICLOCK across a WAN if the accuracy
+expectations are not too strict.
+.Pp
+TAICLOCK is much easier to implement.
+The
+.Xr s6-sntpclock 1
+client binary code (statically linked on a i386) is 50% bigger than
+the
+.Nm
+client.
+Also, the
+.Xr s6-taiclockd 1
+server is extremely small (close to 50% smaller than the client),
+whereas NTP servers, even SNTP servers, are behemoths requiring a
+project of their own.
+.Ss Related work
+The clockspeed[2] package is the original inspiration for the clock
+management part of s6-networking.
+Unfortunately, it is unmaintained.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl f
+Force.
+Normally,
+.Nm
+exits 111 if it cannot compute a time with a smaller uncertainty than
+.Ar errmax .
+If this option is set, it will output a time difference and exit 0
+even if the error is too big.
+.It Fl v Ar verbosity
+Be more or less verbose.
+By default,
+.Ar verbosity
+is 1.  0 means only print fatal error messages; 2 means print advanced
+warnings.
+.It Fl r Ar roundtrips
+Perform
+.Ar roundtrips
+exchanges with the server.
+By default,
+.Ar roundtrips
+is 10.
+A lower value yields a higher time uncertainty; a higher value puts
+more load on the server.
+.It Fl t Ar triptimeout
+If a TAICLOCK exchange with the server takes more than
+.Ar triptimeout
+milliseconds, abort this exchange and move on to the next one.
+By default,
+.Ar triptimeout
+is 2000.
+.It Fl h Ar throttle
+Wait
+.Ar throttle
+milliseconds between exchanges with the server.
+A lower value gets the final result earlier, but exerts more load on
+the server.
+A higher value puts a lighter load on the server, but delays the
+computation.
+By default,
+.Ar throttle
+is 0.
+It is recommended to set it to a reasonable nonzero value when
+increasing
+.Ar roundtrips .
+.It Fl T Ar totaltimeout
+If the whole operation takes more than
+.Ar totaltimeout
+milliseconds, abort and exit 1.
+By default,
+.Ar totaltimeout
+is 10000.
+.It Fl e Ar errmax
+Accept a maximum time uncertainty of
+.Ar errmax
+milliseconds.
+By default,
+.Ar errmax
+is 100.
+.It Fl p Ar port
+Contact a server on port
+.Ar port .
+By default,
+.Ar port
+is 4014.
+.El
+.Sh SEE ALSO
+.Xr s6-clockadd 1 ,
+.Xr s6-clockview 1 ,
+.Xr s6-sntpclock 1 ,
+.Xr s6-taiclockd 1
+.Pp
+[1]
+.Lk https://cr.yp.to/proto/taiclock.txt
+.Pp
+[2]
+.Lk https://cr.yp.to/clockspeed.html
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6-networking/s6-taiclock.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

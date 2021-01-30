@@ -1,0 +1,37 @@
+.Dd January 29, 2021
+.Dt S6-GETSERVBYNAME 1
+.Os
+.Sh NAME
+.Nm s6-getservbyname
+.Nd simple command-line interface to the
+.Xr getservbyname 3
+function, converting a service name and protocol into a port number
+.Sh SYNOPSIS
+.Nm
+.Ar name
+.Ar proto
+.Sh DESCRIPTION
+.Nm
+looks up the network services database for an entry containing name
+.Ar name
+and protocol
+.Ar proto .
+.Pp
+It prints the corresponding port number to stdout, then exits 0.
+.Pp
+If it cannot find a related entry, it exits 1.
+.Sh EXAMPLES
+On a standard machine with a correct
+.Pa /etc/services
+file and a non-garbled NSS configuration:
+.Pp
+.Dl s6-getservbyname smtp tcp
+.Pp
+prints
+.Ql 25 .
+.Sh SEE ALSO
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6-networking/s6-getservbyname.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

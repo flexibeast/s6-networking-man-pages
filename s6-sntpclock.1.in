@@ -1,0 +1,231 @@
+.Dd January 29, 2021
+.Dt S6-SNTPCLOCK 1
+.Os
+.Sh NAME
+.Nm s6-sntpclock
+.Nd small SNTP client
+.Sh SYNOPSIS
+.Nm
+.Op Fl f
+.Op Fl v Ar verbosity
+.Op Fl r Ar roundtrips
+.Op Fl t Ar triptimeout
+.Op Fl h Ar throttle
+.Op Fl T Ar totaltimeout
+.Op Fl e Ar errmax
+.Op Fl p Ar port
+.Ar ipaddress
+.Sh DESCRIPTION
+.Nm
+connects to an SNTP or NTP server, computes an estimated discrepancy
+between the local clock time and the absolute time given by the
+server, and outputs it on stdout.
+.Pp
+.Nm
+exchanges SNTPv4 messages with an SNTP server listening on
+.Ar ipaddress ,
+UDP port 123.
+.Ar ipaddress
+can be IPv4 or IPv6.
+.Pp
+It computes the mean difference between the absolute time given by the
+system clock and the one given by the server.
+.Pp
+It prints the difference to stdout in a format understood
+by
+.Xr s6-clockadd 1
+and
+.Xr s6-clockview 1 .
+It then exits 0.
+.Pp
+There are a lot of infelicities in the NTP protocol (which SNTP is
+a subset of).
+The biggest offender is probably that NTP cannot handle a time
+difference of more than 34 years: if the time given by the NTP server
+is more than 34 years away from the time given by the system clock,
+then NTP just cannot compute.
+This is a problem for CMOS-less systems, where the system clock is
+initialized to the Unix Epoch.
+The solution is to first manually initialize the system clock with a
+program such as
+.Xr date 1
+or
+.Xr s6-clock 1
+to a closer time (such as 2013-01-01, which will be good up to 2047),
+then contact the NTP server.
+.Pp
+A less obvious problem with NTP is that it works with UTC time, which
+means that it gives inaccurate results when close to a leap second, up
+to one second off when used during a leap second, and this is bound to
+the use of UTC: there is nothing you can do about it.
+The only solution to get reliable results even around a leap second is
+to use linear time such as TAI; the
+.Xr s6-taiclock 1
+and
+.Xr s6-taiclockd 1
+programs provide tools to do so.
+.Ss A word on ntpd
+From a Unix software engineering standpoint, the well-known ntpd[1]
+program is an eldritch abomination.
+The main reason for it is that, just like its lovely cousin BIND[2],
+ntpd performs a lot of different tasks in a unique process, instead of
+separating what could, and should, be separated.
+This is confusing for both the programmer
+.Em and
+the software user.
+The term
+.Dq NTP server
+means two different things:
+.Bl -bullet -width x
+.It
+A program that serves NTP time to the Internet and can be accessed by
+NTP clients.
+.It
+A daemon, i.e. a long-lived process, that runs on a machine and
+handles NTP-related stuff such as keeping the system clock accurate.
+.El
+.Pp
+The former is the real meaning of
+.Dq NTP server .
+The latter is a common usage for the term, but comes from a misuse of
+.Dq server
+to mean
+.Dq daemon .
+.Pp
+ntpd does not help clear the misunderstanding since it does both.
+It acts as an NTP server,
+.Em and
+as an NTP client getting its time from lower-strata NTP servers,
+.Em and
+as a local system clock management daemon.
+Those are already 3 separate tasks.
+.Pp
+Local system clock management itself involves several duties.
+There is the regular setting of the system clock, which can be done
+with a loop over a simple program such as
+.Xr s6-clockadd 1 .
+There is also control of the clock skew, which s6-networking does not
+provide because there is no portable interface for that; there is such
+a tool in the clockspeed[3] package.
+.Pp
+ntpd includes a complete cryptographic key management system for the
+crypto part of NTP.
+NTP is not the only protocol that uses cryptography and asymmetric
+keys; managing keys in a separate tool, not in the NTP daemon itself,
+would be simpler and smarter.
+.Pp
+ntpd provides monitoring support for client and server timekeeping
+performance.
+This would be best implemented as a separate specific log analyzing
+tool.
+.Pp
+And of course, no matter how many layers of complexity you add onto
+ntpd, it will never be able to give accurate time in the vicinity of a
+leap second, since the very
+.Em protocol
+is flawed by design - but the ntpd authors cannot be blamed for that.
+Also, the ntpd
+.Em writers ,
+not the designers, should be praised: the history of ntpd security
+flaws is remarkably small, which is quite a feat for a huge monolithic
+root daemon.
+.Pp
+Network synchronization is important, NTP has its perks and valid use
+cases, and its existence is a good thing.
+However, I wish that the main NTP implementation weren't written as a
+big fat clumsy process running as root.
+.Nm
+together with
+.Xr s6-clockadd 1
+aims to provide a small, simple tool to keep system clocks, especially
+in embedded devices, synchronized to a NTP server.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl f
+Force.
+Normally,
+.Nm
+exits 111 if it cannot compute a time with a smaller uncertainty than
+.Ar errmax .
+If this option is set, it will output a time difference and exit 0
+even if the error is too big.
+.It Fl v Ar verbosity
+Be more or less verbose.
+By default,
+.Ar verbosity
+is 1.
+0 means only print fatal error messages; 3 means trace every exchange
+with the server.
+.It Fl r Ar roundtrips
+Perform
+.Ar roundtrips
+exchanges with the server.
+By default,
+.Ar roundtrips
+is 10.
+A lower value yields a higher time uncertainty; a higher value puts
+more load on the server.
+.It Fl t Ar triptimeout
+If an SNTP exchange with the server takes more than
+.Ar triptimeout
+milliseconds, abort this exchange and move on to the next one.
+By default,
+.Ar triptimeout
+is 2000.
+.It Fl h Ar throttle
+Wait
+.Ar throttle
+milliseconds between exchanges with the server.
+A lower value gets the final result earlier, but exerts more load on
+the server.
+A higher value puts a lighter load on the server, but delays the
+computation.
+By default,
+.Ar throttle
+is 0.
+It is recommended to set it to a reasonable nonzero value when
+increasing
+.Ar roundtrips .
+.It Fl T Ar totaltimeout
+If the whole
+operation takes more than
+.Ar totaltimeout
+milliseconds, abort and exit 1.
+By default,
+.Ar totaltimeout
+is 10000.
+.It Fl e Ar errmax
+Accept a maximum time uncertainty of
+.Ar errmax
+milliseconds.
+By default,
+.Ar errmax
+is 100.
+.It Fl p Ar port
+Contact a server on port
+.Ar port .
+By default,
+.Ar port
+is 123.
+.El
+.Sh SEE ALSO
+.Xr s6-clock 1 ,
+.Xr s6-clockadd 1 ,
+.Xr s6-clockview 1 ,
+.Xr s6-taiclock 1 ,
+.Xr s6-taiclockd 1
+.Pp
+[1]
+.Lk https://doc.ntp.org/4.1.0/ntpd.htm
+.Pp
+[2]
+.Lk https://www.isc.org/downloads/bind/
+.Pp
+[3]
+.Lk https://cr.yp.to/clockspeed.html
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6-networking/s6-sntpclock.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

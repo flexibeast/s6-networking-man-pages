@@ -1,0 +1,47 @@
+.Dd January 30, 2021
+.Dt S6-TAICLOCKD 1
+.Os
+.Sh NAME
+.Nm s6-taiclockd
+.Nd server for the TAICLOCK[1]</a> protocol
+.Sh SYNOPSIS
+.Nm
+.Op Fl i Ar ip
+.Op Fl p Ar port
+.Sh DESCRIPTION
+.Nm
+is a long-lived program listening to the network and answering to
+TAICLOCK clients such as
+.Xr s6-taiclock 1 .
+.Pp
+.Nm
+listens to all network addresses on UDP port 4014.
+.Pp
+Whenever it receives a TAICLOCK request, it answers immediately with
+the TAI time given by its local system clock.
+.Pp
+It runs until killed by a signal.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl i Ar ip
+Bind to
+.Ar ip
+instead of all available addresses.
+.Ar ip
+can be IPv4 or IPv6.
+.It Fl p Ar port
+Bind to port
+.Ar port
+instead of 4014.
+.El
+.Sh SEE ALSO
+.Xr s6-taiclock 1
+.Pp
+[1]
+.Lk https://cr.yp.to/proto/taiclock.txt
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6-networking/s6-taiclockd.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

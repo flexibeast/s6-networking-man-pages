@@ -1,0 +1,55 @@
+.Dd January 29, 2021
+.Dt S6-IDENT-CLIENT 1
+.Os
+.Sh NAME
+.Nm s6-ident-client
+.Nd command-line client application that performs IDENT (RFC 1413) queries
+.Sh SYNOPSIS
+.Nm
+.Op Fl t Ar millisecs
+.Ar remoteaddr
+.Ar remoteport
+.Ar localaddr
+.Ar localport
+.Sh DESCRIPTION
+.Nm
+contacts the IDENT server on address
+.Ar remoteaddr
+port 113 and asks it about the connection from address
+.Ar remoteaddr
+port
+.Ar remoteport
+to address
+.Ar localaddr
+port
+.Ar localport .
+.Pp
+It prints the answer to stdout.
+.Pp
+It exits 0 if the answer is positive or 1 if the answer is negative,
+in which case it also prints an informative message to stderr.
+.Pp
+.Ar remoteaddr
+and
+.Ar localaddr
+can be either IPv4 or IPv6 addresses; however, they must both be of
+the same type.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl t Ar millisecs
+If no answer has been
+obtained within
+.Ar millisecs
+milliseconds,
+.Nm
+will exit 99 with an error message.
+By default,
+.Ar millisecs
+is 0, which means no time limit.
+.El
+.Sh SEE ALSO
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6-networking/s6-ident-client.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

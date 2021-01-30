@@ -1,0 +1,204 @@
+.Dd January 30, 2021
+.Dt S6-TCPCLIENT 1
+.Os
+.Sh NAME
+.Nm s6-tcpclient
+.Nd UCSPI client tool[1] for INET domain sockets
+.Sh SYNOPSIS
+.Nm
+.Op Fl q | Fl Q | Fl v
+.Op Fl 4 | Fl 6
+.Op Fl d | Fl D
+.Op Fl r | Fl R
+.Op Fl h | Fl H
+.Op Fl n | Fl N
+.Op Fl t Ar timeout
+.Op Fl l Ar localname
+.Op Fl T Ar timeoutconn
+.Op Fl i Ar localip
+.Op Fl p Ar localport
+.Ar host
+.Ar port
+.Ar prog...
+.Sh DESCRIPTION
+.Nm
+establishes a TCP connection to a server, then executes into a
+program.
+.Pp
+.Nm
+establishes a TCP connection to host
+.Ar host
+port
+.Ar port .
+.Pp
+It executes into
+.Ar prog...
+with descriptor 6 reading from the network and descriptor 7 writing to
+it.
+.Ss Host address determination
+.Ar host
+may be an IP address, in which case
+.Nm
+will connect to that IP address.
+If the underlying skalibs has been compiled with IPv6 support,
+.Ar host
+can be an IPv6 address as well as an IPv4 one.
+.Pp
+.Ar host
+may be a domain name, in which case a DNS resolution will be performed
+on it, and a connection will be tried to all the resulting IP
+addresses in a round-robin fashion, twice: first with a small timeout,
+then with a longer timeout.
+The first address to answer wins.
+The connection attempt fails if no address in the list is able to
+answer.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl q
+Be quiet.
+.It Fl Q
+Be normally verbose.
+This is the default.
+.It Fl v
+Be verbose.
+.It Fl 4
+(Only valid if the underlying skalibs has IPv6 support) Interpret
+.Ar host
+as an IPv4 address or make A queries to determine its addresses.
+.It Fl 6
+(Only valid if the underlying skalibs has IPv6 support) Interpret
+.Ar host
+as an IPv6 address or make AAAA queries to determine its addresses.
+This option and the previous one are not mutually exclusive: if both
+are given, both IPv6 and IPv4 addresses will be tried and IPv6
+addresses will be given priority.
+If neither option is given, only IPv4 address will be tried.
+.It Fl d
+Don't use the
+.Dv TCP_NODELAY
+socket option.
+This is the default.
+.It Fl D
+Use the
+.Dv TCP_NODELAY
+socket option, which disables Nagle's algorithm.
+.It Fl r
+Try and obtain a
+.Ev TCPREMOTEINFO
+string via the IDENT protocol.
+This is obsolete and unreliable, and should only be used for
+compatibility with legacy programs.
+.It Fl R
+Do not use the IDENT protocol.
+This is the default.
+.It Fl h
+Try and obtain the remote host name via DNS.
+This is the default.
+.It Fl H
+Do not try and obtain the remote host name via DNS.
+.It Fl n
+Qualify
+.Ar host
+when resolving it to find suitable IP addresses.
+This is the default.
+.It Fl N
+Do not qualify
+.Ar host .
+.It Fl t Ar timeout
+Put a global timeout on the connection attempt.
+If no fully functional connection has been established after
+.Ar timeout
+seconds, abort the program.
+By default,
+.Ar timeout
+is 0, which means no timeout.
+.It Fl i Ar localip
+Use
+.Ar localip
+as the local socket address for the connection.
+By default, address selection is left to the operating system.
+.It Fl p Ar localport
+Use
+.Ar localport
+as the local socket port for the connection.
+By default, port selection is left to the operating system.
+.It Fl l Ar localname
+Use
+.Ar localname
+as the value of the
+.Ev TCPLOCALPATH
+environment variable instead of looking it up via the DNS.
+.It Fl T Ar timeoutconn
+Configure the connection timeouts.
+.Ar timeoutconn
+must be of the form
+.Ql Ar x Ns + Ns Ar y ,
+where
+.Ar x
+and
+.Ar y
+are integers.
+.Ar x
+is the first timeout and
+.Ar y
+is the second one: all suitable addresses for
+.Ar host
+are first tried with a timeout of
+.Ar x
+seconds, and if all of them fail, then they are tried again with a
+timeout of
+.Ar y
+seconds.
+(Be aware that the timeout specified with the
+.Fl t
+option overrides everything.)
+By default,
+.Ar x
+is 2 and
+.Ar y
+is 58.
+.El
+.Sh ENVIRONMENT
+.Ar prog...
+is run with the following variables set:
+.Bl -tag -width x
+.It Ev PROTO
+Always set to TCP.
+.It Ev TCPREMOTEIP
+Set to the chosen IP address of
+.Ar host .
+.It Ev TCPREMOTEPORT
+Set to
+.Ar port .
+.It Ev TCPREMOTEHOST
+If the
+.Fl H
+option has been given, set to the name obtained by a reverse DNS
+resolution of the IP address chosen for
+.Ar host .
+Else unset.
+.It Ev TCPLOCALHOST
+If the
+.Fl l
+option has been given, set to
+.Ar localname .
+Else set to the name obtained by a reverse DNS resolution of the IP
+address chosen for the local host.
+.It Ev TCPREMOTEINFO
+If the
+.Fl r
+option has been given, set to the information given by an IDENT server
+on
+.Ar host
+about the current connection (very unreliable).
+Else unset.
+.El
+.Sh SEE ALSO
+[1]
+.Lk https://cr.yp.to/proto/ucspi.txt
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6-networking/s6-taiclient.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

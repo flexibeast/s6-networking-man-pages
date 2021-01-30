@@ -4,7 +4,14 @@ man7 = $(MANPATH)/man7/
 
 man1_targets = \
 	s6-clockadd.1 \
-	s6-clockview.1
+	s6-clockview.1 \
+	s6-getservbyname.1 \
+	s6-ident-client.1 \
+	s6-sntpclock.1 \
+	s6-taiclock.1 \
+	s6-taiclockd.1 \
+	s6-tcpclient.1 \
+	s6-tcpserver.1
 
 man7_targets = \
 	s6-tls.7

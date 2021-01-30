@@ -1,0 +1,122 @@
+.Dd January 30, 2021
+.Dt S6-TCPSERVER 1
+.Os
+.Sh NAME
+.Nm s6-tcpserver
+.Nd UCSPI tool[1] for TCP connections, i.e. a super-server
+.Sh SYNOPSIS
+.Nm
+.Op Fl q | Fl Q | Fl v
+.Op Fl 4 | Fl 6
+.Op Fl 1
+.Op Fl c Ar maxconn
+.Op Fl C Ar localmaxconn
+.Op Fl b Ar backlog
+.Op Fl G Ar gidlist
+.Op Fl g Ar gid
+.Op Fl u Ar uid
+.Op Fl U
+.Ar ip
+.Ar port
+.Ar prog...
+.Sh DESCRIPTION
+.Nm
+accepts connections from clients, and forks a program to handle each
+connection.
+.Pp
+.Nm
+executes into
+.Xr s6-tcpserver4 1
+or
+.Xr s6-tcpserver6 1
+depending on whether
+.Ar ip
+is an IPv4 or IPv6 address.
+It modifies some of its option syntax to match
+.Xr s6-tcpserver4 1
+and
+.Xr s6-tcpserver6 1 Ap
+s.
+.Pp
+.Xr s6-tcpserver4 1
+or
+.Xr s6-tcpserver6 1
+handles the connection itself.
+.Pp
+.Nm
+will not bind to every available IP address of the machine whether
+they are v4 or v6; on the other hand, it can bind to every available
+IPv4 address (if
+.Ar ip
+is
+.Ql 0.0.0.0 )
+or to every available IPv6 address (if
+.Ar ip
+is
+.Ql :: .
+Two instances of
+.Nm
+can cover every available address.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl q
+Be quiet.
+This is converted into
+.Fl v Ns 0
+for
+.Xr s6-tcpserver4 1
+or
+.Xr s6-tcpserver6 1 .
+.It Fl Q
+Be normally quiet.
+This is converted into
+.Fl v Ns 1
+for
+.Xr s6-tcpserver4 1
+or
+.Xr s6-tcpserver6 1 .
+This is the default.
+.It Fl v
+Be verbose.
+This is converted into
+.Fl v Ns 2
+for
+.Xr s6-tcpserver4 1
+or
+.Xr s6-tcpserver6 1 .
+.It Fl 4
+IPv4 only.
+Interpret
+.Ar ip
+as IPv4; if it is invalid, exit 100.
+.It Fl 6
+IPv6 only.
+Interpret
+.Ar ip
+as IPv6; if it is invalid, exit 100.
+If neither the
+.Fl 4
+nor the
+.Fl 6
+option is given,
+.Nm
+will parse
+.Ar ip
+to determine its family.
+.El
+.Pp
+Every other option is passed verbatim to
+.Xr s6-tcpserver4 1 or
+.Xr s6-tcpserver6 1 .
+.Sh SEE ALSO
+.Xr s6-tcpserver4 1 ,
+.Xr s6-tcpserver6 1
+.Pp
+[1]
+.Lk https://cr.yp.to/proto/ucspi.txt
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6-networking/s6-tcpserver.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)
