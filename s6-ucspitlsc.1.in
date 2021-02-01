@@ -1,0 +1,225 @@
+.Dd February 1, 2021
+.Dt S6-UCSPITLSC 1
+.Os
+.Sh NAME
+.Nm s6-ucspitlsc
+.Nd client-side program that establishes communication channels according to the UCSPI-TLS protocol, then execs into an application
+.Sh SYNOPSIS
+.Nm
+.Op Fl S | Fl s
+.Op Fl Y | Fl y
+.Op Fl Z | Fl z
+.Op Fl v Ar verbosity
+.Op Fl K kimeout
+.Op Fl k Ar servername
+.Op Fl 6 Ar rfd
+.Op Fl 7 Ar wfd
+.Op --
+.Ar prog...
+.Sh DESCRIPTION
+If the application sends a command, a TLS tunnel will be started and
+the application will be able to use it instead of communicating with
+the network via cleartext.
+.Pp
+The point of this protocol, and this program, is to make it easy to
+implement commands like SMTP's STARTTLS without embedding a TLS stack
+in the client itself.
+.Pp
+.Nm
+expects to have an open TCP connection it can talk to on its (by
+default) descriptors 6 (for reading) and 7 (for writing).
+.Pp
+It forks and establishes communication channels between the parent and
+the child.
+The parent executes into
+.Ar prog... ;
+the child remains and waits for a command.
+.Pp
+At any time,
+.Ar prog...
+can send a command to its control socket provided by
+.Nm ,
+following the UCSPI-TLS[1] protocol.
+Then the s6-ucspitlsc child will exec into an
+.Xr s6-tlsc-io 1
+process that will initiate the TLS connection, perform the handshake
+(expecting a TLS server on the other side of the network) and maintain
+a TLS tunnel.
+.Ar prog
+can use that TLS tunnel instead of talking directly to the network.
+.Pp
+It only makes sense to run s6-ucspitlsc if its application
+program
+.Ar prog
+knows and understands the UCSPI-TLS[1] protocol for opportunistic TLS.
+If it does not, you will not be able to secure your connection, and
+what you need is a regular immediate TLS program instead, which means
+.Xr s6-tlsc 1 .
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl v Ar verbosity
+Be more or less verbose.
+Default for
+.Ar verbosity
+is 1.
+0 is quiet, 2 is verbose, more than 2 is debug output.
+This option currently has no effect.
+.It Fl Z
+Do not clean the environment of the variables used by
+.Xr s6-tlsc-io 1
+before
+.Xr exec 3 Ap
+ing
+.Ar prog... .
+.It Fl z
+Clean the environment of the variables used by
+.Xr s6-tlsc-io 1
+before
+.Xr exec 3 Ap
+ing
+.Ar prog... .
+This is the default.
+.It Fl S
+Send a
+.Ql close_notify
+alert and break the connection when
+.Ar prog
+sends EOF.
+.It Fl s
+Transmit EOF by half-closing the TCP connection without using
+.Ql close_notify .
+This is the default.
+.It Fl Y
+Do not send a client certificate.
+This is the default.
+.It Fl y
+Send a client certificate.
+.It Fl k Ar servername
+Use Server Name Indication, and send
+.Ar servername .
+The default is not to use SNI, which may be a security risk.
+.It Fl K Ar kimeout
+Close the connection if
+.Ar kimeout
+milliseconds elapse without any data being received from either side.
+The default is 0, which means infinite timeout (never kill the
+connection).
+.It Fl 6 Ar fdr
+Expect an open file descriptor numbered
+.Ar fdr
+to read network (ciphertext) data from.
+Make sure
+.Ar prog
+also reads its data from its own fd
+.Ar fdr .
+Default is 6.
+.It Fl 7
+Expect an open file descriptor numbered
+.Ar fdw
+to write network (ciphertext) data to.
+Make sure
+.Ar prog
+also writes its data to its own fd
+.Ar fdw .
+Default is 7.
+.El
+.Sh ENVIRONMENT
+.Ss Read
+.Nm
+does not expect to have any particular environment variables, but it
+spawns a
+.Xr s6-tlsc-io 1
+program that does.
+So it should pay attention to the following variables:
+.Bl -bullet -width x
+.It
+.Ev CADIR
+or
+.Ev CAFILE
+.It
+(If the
+.Fl y
+option has been given)
+.Ev CERTFILE
+and
+.Ev KEYFILE
+.It
+.Ev TLS_UID
+and
+.Ev TLS_GID
+.El
+.Ss Written
+By default,
+.Ar prog...
+is run with all these variables
+.Em unset :
+.Ev CADIR ,
+.Ev CAFILE ,
+.Ev KEYFILE ,
+.Ev CERTFILE ,
+.Ev TLS_UID
+and
+.Ev TLS_GID .
+They're passed to the
+.Xr s6-tlsc-io 1
+child but not to
+.Ar prog... .
+The
+.Fl Z
+option prevents that behaviour.
+.Pp
+However,
+.Ar prog...
+is run with the following additional environment variables, following
+the UCSPI-TLS protocol:
+.Bl -tag -width x
+.It Ev SSLCTLFD
+Contains the file descriptor number of the control socket.
+.It Ev SSLREADFD
+Contains the file descriptor number of the pipe used to read data from
+the TLS tunnel after it has been activated.
+.It Ev SSLWRITEFD
+Contains the file descriptor number of the pipe used to write data to
+the TLS tunnel after it has been activated.
+.El
+.Pp
+Since
+.Ar prog
+is
+.Xr exec 3 Ap
+ed before the TLS handshake takes place, it cannot get information
+about the TLS connection via environment variables.
+However, if it starts the TLS connection via a
+.Ql Y
+command (as opposed to a
+.Ql y
+command), it will receive this information as a string sent over the
+control socket.
+.Sh EXIT STATUS
+.Bl -tag -width x
+.It 100
+Wrong usage.
+.It 111
+System call failed.
+.El
+.Pp
+Normally the parent
+.Nm
+process execs into
+.Ar prog...
+and the child process execs into
+.Xr s6-tlsc-io 1 .
+If the parent dies or closes its control socket before sending a
+command to start TLS, the child exits 0.
+.Sh SEE ALSO
+.Xr s6-tlsc 1 ,
+.Xr s6-tlsc-io 1
+.Pp
+[1]
+.Lk https://web.archive.org/web/20150311223933/http://www.suspectclass.com/sgifford/ucspi-tls/ucspi-tls.txt
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6-networking/s6-ucspitlsc.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

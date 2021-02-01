@@ -1,0 +1,138 @@
+.Dd January 31, 2021
+.Dt S6-TCPSERVER6D 1
+.Os
+.Sh NAME
+.Nm s6-tcpserver6d
+.Nd the serving part of the
+.Xr s6-tcpserver6 1
+super-server
+.Sh SYNOPSIS
+.Nm
+.Op Fl 1
+.Op Fl v Ar verbosity
+.Op Fl c Ar maxconn
+.Op Fl C Ar localmaxconn
+.Ar prog...
+.Sh DESCRIPTION
+.Nm
+assumes that its stdin is a bound and listening TCP/IPv6 socket, and
+it accepts connections from clients connecting to it, forking a
+program to handle each connection.
+.Pp
+.Nm
+accepts connections from clients to an already bound and listening TCP
+socket which is its standard input.
+.Pp
+For every TCP connection to this socket, it forks.
+The child sets some environment variables, then
+executes
+.Ar prog...
+with stdin reading from the network socket and stdout writing to it.
+.Pp
+Depending on the verbosity level, it logs what it does to stderr.
+.Pp
+It runs until killed by a signal.
+Depending on the received signal, it may kill its children before
+exiting.
+.Pp
+Unlike its ancestor tcpserver[1],
+.Nm
+performs just the bare minimum: the point is to have a very small and
+very fast process to serve connections with the least possible
+overhead.
+Features such as additional environment variables, access control and
+DNS resolution are provided via the
+.Xr s6-tcpserver-access 1
+program.
+.Pp
+.Nm
+is meant to be
+.Xr execve 2 Ap
+d into by a program that gets the listening socket.
+That program is normally
+.Xr s6-tcpserver6-socketbinder 1 ,
+which creates the socket itself; but it can be a different one if the
+socket is to be retrieved by another means, for instance by fd-passing
+from a fd-holding daemon (some people call this
+.Dq socket activation Ns
+).
+.Ss Signals
+.Bl -tag -width x
+.It Dv SIGTERM
+Exit.
+.It Dv SIGHUP
+Send a
+.Dv SIGTERM
+and a
+.Dv SIGCONT
+to all children.
+.It Dv SIGQUIT
+Send a
+.Dv SIGTERM
+and a
+.Dv SIGCONT
+to all children, then exit.
+.It Dv SIGABRT
+Send a
+.Dv SIGKILL
+to all children, then exit.
+.El
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl 1
+Write a newline to stdout, and close stdout, right before entering the
+client-accepting loop.
+If stdout is suitably redirected, this can be used by monitoring
+programs to check when the server is accepting connections, for
+instance s6's
+.Xr s6-notifywhenup 7
+readiness notification mechanism.
+.It Fl v Ar verbosity
+Be more or less verbose.
+By default,
+.Ar verbosity
+is 1: print warning messages to stderr.
+0 means only print fatal error messages; 2 means print status and
+connection information for every client.
+.It Fl c Ar maxconn
+Accept at most
+.Ar maxconn
+concurrent connections.
+Default is 40.
+It is impossible to set it higher than 1000.
+.It Fl C Ar localmaxconn
+Accept at most
+.Ar localmaxconn
+connections from the same IP address.
+Default is 40.
+It is impossible to set it higher than
+.Ar maxconn .
+.El
+.Sh ENVIRONMENT
+For each connection, an instance of
+.Ar prog...
+is spawned with the following variables set:
+.Bl -tag -width x
+.It Ev PROTO
+Always set to TCP.
+.It Ev TCPREMOTEIP
+Set to the originating address.
+.It Ev TCPREMOTEPORT
+Set to the originating port.
+.It Ev TCPCONNNUM
+Set to the number of connections originating from the same IP address.
+.El
+.Sh SEE ALSO
+.Xr s6-tcpserver-access 1 ,
+.Xr s6-tcpserver6 1 ,
+.Xr s6-tcpserver6-socketbinder 1 ,
+.Xr s6-notifywhenup 7
+.Pp
+[1]
+.Lk https://cr.yp.to/ucspi-tcp/tcpserver.html
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6-networking/s6-tcpserver6d.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

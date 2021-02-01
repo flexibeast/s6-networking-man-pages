@@ -1,0 +1,373 @@
+.Dd January 31, 2021
+.Dt S6-TCPSERVER-ACCESS 1
+.Os
+.Sh NAME
+.Nm s6-tcpserver-access
+.Nd command-line TCP access control tool
+.Sh SYNOPSIS
+.Nm
+.Op Fl v Ar verbosity
+.Op Fl W | Fl w
+.Op Fl D | Fl d
+.Op Fl H | Fl h
+.Op Fl R | Fl r
+.Op Fl P | Fl p
+.Op Fl l Ar localname
+.Op Fl B Ar banner
+.Op Fl t Ar timeout
+.Op Fl i Ar rulesdir | Fl x Ar rulesfile
+.Ar prog...
+.Sh DESCRIPTION
+.Nm
+is meant to be run after
+.Xr s6-tcpserver 1
+and before the application program on the
+.Xr s6-tcpserver 1
+command line, just like tcpwrappers'
+.Pa tcpd
+program.
+It additionally performs some fine-tuning on a TCP socket.
+.Pp
+.Nm
+checks it is run under a UCSPI server tool
+such as
+.Xr s6-tcpserver 1 ,
+.Xr s6-tcpserver4 1
+or
+.Xr s6-tcpserver6 1 ,
+or their stripped-down versions
+.Xr s6-tcpserver4d 1
+or
+.Xr s6-tcpserver6d 1 .
+.Pp
+It checks that the remote end of the connection fits the accepted criteria defined by the database contained in
+.Ar rulesdir
+or
+.Ar rulesfile .
+If the database tells it to reject the connection, the program exits
+1.
+.Pp
+It sets up a few additional environment variables.
+.Pp
+It executes into
+.Ar prog... ,
+unless the first matching rule in the rule database includes
+instructions to override
+.Ar prog... .
+.Pp
+.Nm
+works with
+.Xr s6-tcpserver4d 1 ,
+handling IPv4 addresses, as well as
+.Xr s6-tcpserver6d 1 ,
+handling IPv6 addresses.
+It will automatically detect the remote address type and match it
+against the correct subdatabase.
+.Pp
+.Nm
+may perform several DNS queries.
+For efficiency purposes, it does as many of them as possible in
+parallel.
+However, if asked to do an IDENT query, it does not parallelize it
+with DNS queries.
+Take that into account when estimating a proper <em>timeout</em>
+value.
+.Ss Access rule checking
+.Nm
+checks its client connection against a ruleset.
+This ruleset can be implemented:
+.Bl -bullet -width x
+.It
+either in the filesystem as an arborescence of directories and files,
+if the
+.Fl i
+option has been given.
+This option is the most flexible one: the directory format is simple
+enough for scripts to understand and modify it, and the ruleset can be
+changed dynamically.
+This is practical, for instance, for roaming users.
+.It
+or in a CDB file[1], if the
+.Fl x
+option has been given.
+This option is the most efficient one if the ruleset is static enough:
+a lot less system calls are needed to perform searches in a CDB than
+in the filesystem.
+.El
+.Pp
+The exact format of the ruleset is described on the
+.Xr s6-accessrules-cdb-from-fs 1
+page.
+.Pp
+.Nm
+first gets the remote address
+.Ar ip
+of the client and converts it to canonical form.
+Then it checks it with the
+.Fn s6_accessrules_keycheck_ip46
+function.
+.Po
+Refer to
+.Xr s6-accessrules 7 .
+.Pc
+In other words, it tries to match broader and broader network
+prefixes of
+.Ar ip ,
+from
+.Ql ip4/ Ns Ar ip Ns _32
+to
+.Ql ip4/0.0.0.0_0
+if
+.Ar ip
+is v4, or from
+.Ql ip6/ Ns Ar ip Ns _128
+to
+.Ql ip6/::_0
+if
+.Ar ip
+is v6.
+If the result is:
+.Bl -tag -width x
+.It Dv S6_ACCESSRULES_ERROR
+it immediately exits 111.
+.It Dv S6_ACCESSRULES_DENY
+it immediately exits 1.
+.It Dv S6_ACCESSRULES_ALLOW
+it grants access.
+.It Dv S6_ACCESSRULES_NOTFOUND
+more information is needed.
+.El
+.Pp
+In the last case, if DNS lookups have been deactivated
+.Po
+.Fl H
+.Pc
+then access is denied.
+But if
+.Nm
+is authorized to perform DNS lookups, then it gets the remote name of
+the client,
+.Ar remotehost ,
+and checks it with the
+.Fn s6_accessrules_keycheck_reversedns
+function.
+.Po
+Refer to
+.Xr s6-accessrules 7 .
+.Pc
+In other words, it tries to match shorter and shorter suffixes
+of
+.Ar remotehost ,
+from
+.Ql reversedns/ Ns Ar remotehost
+to
+.Ql reversedns/@ .
+This time, the connection is denied is the result is anything else
+than
+.Dv S6_ACCESSRULES_ALLOW .
+.Pp
+Note that even if the access check succeeds, the connection can still be
+denied if paranoid mode has been requested
+.Po
+.Fl p
+.Pc
+and a forward DNS query on
+.Ar remotehost
+does not match
+.Ar ip .
+.Ss Environment and executable modifications
+.Nm
+interprets non-empty
+.Pa env
+subdirectories and
+.Pa exec
+files it finds in the matching rule of the ruleset, as explained in
+the
+.Xr s6-accessrules-cdb-from-fs 1
+page.
+.Pp
+An
+.Pa env
+subdirectory is interpreted as if the
+.Xr s6-envdir 1
+command had been called before executing
+.Ar prog :
+the environment is modified according to the contents of
+.Pa env .
+.Pp
+An
+.Pa exec
+file containing
+.Ar newprog
+completely bypasses the rest of
+.Sm off
+.Nm Ap
+.Sm on
+command line.
+After environment modifications, if any,
+.Nm
+execs
+into
+.Ql execlineb -c Ar newprog .
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl v Ar verbosity
+Be more or less verbose, i.e. print more or less information to stderr:
+.Bl -tag -width x
+.It 0
+Only log error messages.
+.It 1
+Only log error and warning messages, and accepted connections.
+This is the default.
+.It 2
+Also log rejected connections and more warning messages.
+.It 3
+Also log detailed warning messages from DNS and IDENT resolution.
+.El
+.It Fl W
+Non-fatal.
+If errors happen during DNS or IDENT resolution, the connection
+process is not aborted.
+However, incorrect or incomplete results might still prevent a
+legitimate connection from being authenticated against a DNS name.
+This is the default.
+.It Fl w
+Fatal.
+Errors during DNS or IDENT resolution will drop the connection.
+.It Fl D
+Disable Nagle's algorithm.
+Sets the
+.Dv TCP_NODELAY
+flag on the network socket.
+.It Fl d
+Enable Nagle's algorithm.
+This is the default.
+.It Fl H
+Disable DNS lookups for the
+.Ev ${PROTO}LOCALHOST
+and
+.Ev ${PROTO}REMOTEHOST
+environment variables.
+.It Fl h
+Enable DNS lookups.
+This is the default.
+.It Fl R
+DDisable IDENT lookups for the
+.Ev ${PROTO}REMOTEINFO
+environment variable.
+This is the default.
+.It Fl r
+Enable IDENT lookups.
+This should only be done for legacy programs that need it.
+.It Fl P
+No paranoid DNS lookups.
+This is the default.
+.It Fl p
+Paranoid.
+After looking up a name for the remote host,
+.Nm
+will lookup IP addresses for this name, and drop the connection if
+none of the results matches the address the connection is originating
+from.
+Note that this still does not replace real authentication via a
+cryptographic protocol.
+.It Fl l Ar localname
+Use
+.Ar localname
+as the value for the
+.Ev ${PROTO}LOCALHOST
+environment variable, instead of looking it up in the DNS.
+.It Fl B Ar banner
+Print
+.Ar banner
+to the network as soon as the connection is attempted, even before
+checking client credentials.
+The point is to speed up network protocols that start with a
+server-side message.
+.It Fl t Ar timeout
+Set a timeout on all the operations performed by
+.Nm
+If it is not able to do its job in
+.Ar timeout
+milliseconds, it will instantly exit 99.
+The default is 0, meaning no such timeout.
+.It Fl i Ar rulesdir
+Check client credentials against a filesystem-based database in the
+.Ar rulesdir
+directory.
+.It Fl x Ar rulesfile
+Check client credentials against a CDB[1] database in the
+.Ar rulesfile
+file.
+.Fl i
+and
+.Fl x
+are mutually exclusive.
+If none of those options is given, no credential checking will be
+performed, and a warning will be emitted on every connection if
+.Ar verbosity
+is 2 or more.
+.El
+.Sh ENVIRONMENT
+.Nm
+expects to inherit some environment variables from
+its parent:
+.Bl -tag -width x
+.It Ev PROTO
+Normally TCP, but could be anything else, like SSL.
+.It Ev ${PROTO}REMOTEIP
+The remote address of the socket, i.e. the client's IP address.
+This can be IPv4 or (if the underlying skalibs supports it) IPv6.
+.It Ev ${PROTO}REMOTEPORT
+The remote port of the socket.
+.El
+.Pp
+Additionally, it exports the following variables before executing into
+.Ar prog... :
+.Bl -tag -width x
+.It Ev ${PROTO}LOCALIP
+Set to the local address of the socket.
+.It Ev ${PROTO}LOCALPORT
+Set to the local port of the socket.
+.It Ev ${PROTO}REMOTEINFO
+Normally unset, but set to the information retrieved from
+.Ev ${PROTO}REMOTEIP
+via the IDENT protocol if the
+.Fl r
+option has been given.
+.It Ev ${PROTO}REMOTEHOST
+Set to the remote host name obtained from a DNS lookup.
+Unset if the
+.Fl H
+option has been given.
+.It Ev ${PROTO}LOCALHOST
+Set to the local host name obtained from a DNS lookup.
+If the
+.Fl l
+option has been given, set to
+.Ar localname
+instead.
+.El
+.Pp
+Also, the access rules database can instruct
+.Nm
+to set up, or unset, more environment variables, depending on the
+client address.
+.Sh SEE ALSO
+.Xr s6-accessrules-cdb-from-fs 1 ,
+.Xr s6-envdir 1 ,
+.Xr s6-tcpserver 1 ,
+.Xr s6-tcpserver4 1 ,
+.Xr s6-tcpserver4d 1 ,
+.Xr s6-tcpserver6 1 ,
+.Xr s6-tcpserver6d 1 ,
+.Xr s6-accessrules 7
+.Pp
+[1]
+.Lk https://en.wikipedia.org/wiki/Cdb_(software)
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6-networking/s6-tcpserver-access.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

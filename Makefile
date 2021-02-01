@@ -11,7 +11,18 @@ man1_targets = \
 	s6-taiclock.1 \
 	s6-taiclockd.1 \
 	s6-tcpclient.1 \
-	s6-tcpserver.1
+	s6-tcpserver.1 \
+	s6-tcpserver-access.1.in \
+	s6-tcpserver4.1.in \
+	s6-tcpserver4d.1.in \
+	s6-tcpserver6.1.in \
+	s6-tcpserver6d.1.in \
+	s6-tlsc-io.1.in \
+	s6-tlsd.1.in \
+	s6-tlsd-io.1.in \
+	s6-tlsserver.1.in \
+	s6-ucspitlsc.1.in \
+	s6-ucspitlsd.1.in
 
 man7_targets = \
 	s6-tls.7

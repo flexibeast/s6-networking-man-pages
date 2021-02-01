@@ -1,0 +1,250 @@
+.Dd February 1, 2021
+.Dt S6-TLSD-IO 1
+.Os
+.Sh NAME
+.Nm s6-tlsd-io
+.Nd establish a TLS or SSL server connection over an existing TCP connection, then
+communicate with an existing local program over already established pipes
+.Sh SYNOPSIS
+.Nm
+.Op Fl S | Fl s
+.Op Fl Y | Fl y
+.Op Fl v Ar verbosity
+.Op Fl K kimeout
+.Op Fl d notif
+.Op --
+.Ar fdr
+.Ar fdw
+.Sh DESCRIPTION
+.Nm
+is the only server-side program in s6-networking that performs
+cryptography.
+.Pp
+s6-networking does not include cryptographic software.
+All the crypto used in
+.Nm
+is provided by the chosen SSL backend: BearSSL[1] or LibreSSL[2],
+depending on the options given when configuring s6-networking.
+.Pp
+.Nm
+expects to have an open connection it can talk to on its standard
+input and output.
+It also expects to read cleartext data from file descriptor
+.Ar fdr
+and write cleartext data to file descriptor
+.Ar fdw .
+.Pp
+It expects a TLS client on the other side of the network connection to
+initiate a TLS handshake, and it answers it.
+.Pp
+Then it acts as a full duplex tunnel, decrypting and transmitting data
+from stdin to
+.Ar fdw ,
+and encrypting and transmitting data from
+.Ar fdr
+to stdout.
+.Pp
+When it cannot transmit any more data from/to the local application
+because connections have closed,
+.Nm
+exits.
+.Ss Protocol version and parameters
+During the TLS/SSL handshake,
+.Nm
+tries the versions of the protocol that is supported by default by the
+backend, with the default algorithms and cipher suites; the backend
+normally ensures that the most secure combination is tried first, with
+slow degradation until the client and the server agree.
+.Pp
+For BearSSL, this means use of the
+.Fn br_ssl_server_init_full_rsa
+or
+.Fn br_ssl_server_init_full_ec
+function[3,4].
+The supported protocol versions are described in [5].
+.Pp
+For LibreSSL, this means use of the
+.Fn tls_config_set_protocols TLS_PROTOCOLS_DEFAULT
+call[6].
+.Pp
+As a server,
+.Nm
+can be conservative in its choice of protocols.
+It is currently not very conservative when using the BearSSL backend;
+it could become more so in the future, by defining a custom server
+profile that supports only TLS-1.2 but with several algorithms and
+cipher suites.
+.Ss SSL close handling
+If the local application initiates the end of the session by sending
+EOF to
+.Ar fdr ,
+there are two ways for the TLS layer to handle it.
+.Bl -bullet -width x
+.It
+It can send a
+.Ql close_notify
+alert, and wait for an acknowledgement from the peer, at which point
+the connection is closed.
+The advantage of this setup is that it is secure even when the
+application protocol is not auto-terminated, i.e.  when it does not
+know when its data stops.
+Old protocols such as HTTP-0.9 are in this case.
+The drawback of this setup is that it breaks full-duplex: once a peer
+has sent the
+.Ql close_notify ,
+it must discard all the incoming records that are not a
+.Ql close_notify
+from the other peer.
+So if a client sends EOF while it is still receiving data from the
+server, the connection closes immediately and the data can be
+truncated.
+.It
+It can simply transmit the EOF, shutting down half the TCP connection,
+and wait for the EOF back.
+The advantage of this setup is that it maintains full-duplex: a client
+can send EOF after its initial request, and still receive a complete
+answer from the server.
+The drawback is that it is insecure when the application
+protocol is not auto-terminated.
+.El
+.Pp
+Nowadays (2020), most protocols are auto-terminated, so it is not
+dangerous anymore to use EOF tranmission, and that is the default for
+.Nm .
+Nevertheless, by using the
+.Fl S
+option, you can force it to use the
+.Ql close_notify
+method if your application requires it to be secure.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl v Ar verbosity
+Be more or less verbose.
+Default for
+.Ar verbosity
+is 1.
+0 is quiet, 2 is verbose, more than 2 is debug output.
+This option currently has no effect.
+.It Fl S
+Send a
+.Ql close_notify
+alert and break the connection when receiving a local EOF.
+.It Fl s
+Transmit EOF by half-closing the TCP connection without using
+.Ql close_notify .
+This is the default.
+.It Fl Y
+Do not send a client certificate.
+This is the default.
+.It Fl y
+Send a client certificate.
+.It Fl K Ar kimeout
+If the peer fails to send data for
+.Ar kimeout
+milliseconds during the handshake, close the connection.
+The default is 0, which means infinite timeout (never kill the
+connection).
+This option is ignored by the
+.Ql libtls
+backend, which does not have a way to interrupt the handshake after a
+timeout.
+.It Fl d Ar notif
+Handshake notification.
+.Ar notif
+must be a file descriptor open for writing.
+When the TLS handshake has completed, some data (terminated by two
+null characters) will be sent to file descriptor
+.Ar notif .
+The data contains information about the TLS parameters of the
+connection; its exact contents are left unspecified, but there's at
+least an
+.Ql SSL_PROTOCOL= Ns Ar protocol
+string and an
+.Ql SSL_CIPHER= Ns Ar cipher
+string, both null-terminated.
+Sending this data serves a dual purpose: telling the
+.Ar notif
+reader that the handshake has completed, and providing it with some
+basic information about the connection.
+If this option is not given, no such notification is performed.
+.El
+.Sh ENVIRONMENT
+.Nm
+expects to have the following environment variables set:
+.Bl -tag -width x
+.It Ev KEYFILE
+A path to the file containing the server's private key, DER- or
+PEM-encoded.
+.It Ev CERTFILE
+A path to the file containing the server's certificate, DER- or
+PEM-encoded.
+If PEM-encoded, the file can actually contain a chain of certificates.
+.El
+.Pp
+If one of those variables is unset,
+.Nm
+will refuse to run.
+.Pp
+If you are using client certificates,
+.Nm
+also requires either one of the following variables to be set:
+.Bl -tag -width x
+.It Ev CADIR
+A directory where trust anchors (i.e. root or intermediate CA
+certificates) can be found, one per file, DER- or PEM-encoded.
+.It Ev CAFILE
+A file containing the whole set of trust anchors, PEM-encoded.
+.El
+.Pp
+If
+.Nm
+is run as root, it can also read two more environment variables,
+.Ev TLS_UID
+and
+.Ev TLS_GID ,
+which contain a numeric uid and a numeric gid;
+.Nm
+then drops its root privileges to this uid/gid after reading its
+private key file.
+This ensures that the engine, including the handshake, is run with as
+little privilege as possible.
+.Sh EXIT STATUS
+.Bl -tag -width x
+.It 0
+The connection terminated normally.
+.It 96
+Error while configuring the TLS context - for instance, invalid
+private key or server certificate files.
+.It 97
+Error while setting up the TLS server engine.
+.It 98
+TLS error while running the engine.
+.It 100
+Wrong usage.
+.It 111
+System call failed.
+.El
+.Sh SEE ALSO
+[1]
+.Lk https://bearssl.org/
+.Pp
+[2]
+.Lk https://www.libressl.org/
+.Pp
+[3]
+.Lk https://bearssl.org/apidoc/bearssl__ssl_8h.html#a76293c81c4624c58254a62be7b2d5e79
+.Pp
+[4]
+.Lk https://bearssl.org/apidoc/bearssl__ssl_8h.html#a592b2af27b2f6b9389aac854fb0b783a
+.Pp
+[5]
+.Lk https://bearssl.org/support.html#supported-versions
+.Pp
+[6]
+.Lk https://man.openbsd.org/OpenBSD-current/man3/tls_config_set_protocols.3
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6-networking/s6-tlsd-io.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

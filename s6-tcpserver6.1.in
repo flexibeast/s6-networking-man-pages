@@ -1,0 +1,195 @@
+.Dd January 31, 2021
+.Dt S6-TCPSERVER6 1
+.Os
+.Sh NAME
+.Nm s6-tcpserver6
+.Nd super-server for IPv6 TCP connections
+.Sh SYNOPSIS
+.Nm
+.Op Fl 1
+.Op Fl v Ar verbosity
+.Op Fl c Ar maxconn
+.Op Fl C Ar localmaxconn
+.Op Fl b Ar backlog
+.Op Fl G Ar gidlist
+.Op Fl g Ar gid
+.Op Fl u Ar uid
+.Op Fl U
+.Ar ip
+.Ar port
+.Ar prog
+.Sh DESCRIPTION
+.Nm
+accepts connections from clients, and forks a program to handle each
+connection.
+.Pp
+.Nm
+binds to local IPv6 address
+.Ar ip ,
+port
+.Ar port .
+.Pp
+It closes its stdin and stdout.
+.Pp
+For every TCP connection to this address and port, it forks.
+The child sets some environment variables, then executes
+.Ar prog...
+with stdin reading from the network socket and stdout writing to it.
+.Pp
+Depending on the verbosity level, it logs what it does to stderr.
+.Pp
+It runs until killed by a signal.
+Depending on the received signal, it may kill its children before
+exiting.
+.Pp
+.Nm
+actually doesn't do any of this itself.
+It is a wrapper, rewriting the command line and executing into a chain
+of programs that perform those duties.
+.Pp
+.Nm
+will only serve real IPv6 addresses; it does not default to an IPv4
+address.
+The
+.Xr s6-tcpserver4 1
+program should be used to serve IPv4 addresses.
+.Pp
+.Nm
+will only work if the underlying skalibs[1] has been compiled with
+IPv6 support.
+.Pp
+In previous releases of s6-networking, s6-tcpserver6 was
+monolithic: it did the work of
+.Xr s6-tcpserver6-socketbinder 1 ,
+.Xr s6-applyuidgid 1
+and
+.Xr s6-tcpserver6d 1
+itself.
+The functionality has now been split into several different programs
+because some service startup schemes require the daemon to get its
+socket from an external program instead of creating and binding it
+itself.
+The most obvious application of this is upgrading a long-lived process
+without losing existing connections.
+.Ss Signals
+.Bl -tag -width x
+.It Dv SIGTERM
+Exit.
+.It Dv SIGHUP
+Send a
+.Dv SIGTERM
+and a
+.Dv SIGCONT
+to all children.
+.It Dv SIGQUIT
+Send a
+.Dv SIGTERM
+and a
+.Dv SIGCONT
+to all children, then exit.
+.It Dv SIGABRT
+Send a
+.Dv SIGKILL
+to all children, then exit.
+.El
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl 1
+Write
+.Ar port
+to stdout, before closing it, right after binding and listening to the
+network socket.
+If stdout is suitably redirected, this can be used by monitoring
+programs to check when the server is ready to accept connections.
+.It Fl v Ar verbosity
+Be more or less verbose.
+By default,
+.Ar verbosity
+is 1: print warning messages to stderr.
+0 means only print fatal error messages; 2 means print status and
+connection information for every client.
+.It Fl c Ar maxconn
+Accept at most
+.Ar maxconn
+concurrent connections.
+Default is 40.
+It is impossible to set it higher than 1000.
+.It Fl C Ar localmaxconn
+Accept at most
+.Ar localmaxconn
+connections from the same IP address.
+Default is 40.
+It is impossible to set it higher than
+.Ar maxconn .
+.It Fl b Ar backlog
+Set a maximum of
+.Ar backlog
+backlog connections on the socket.
+Extra connection attempts will rejected by the kernel.
+.It Fl G Ar gidlist
+Change
+.Nm Ap
+s supplementary group list to
+.Ar gidlist
+after binding the socket.
+This is only valid when run as root.
+.Ar gidlist
+must be a comma-separated list of numerical group IDs.
+.It Fl g Ar gid
+Change
+.Nm Ap
+s group id to
+.Ar gid
+after binding the socket.
+This is only valid when run as root.
+.It Fl u Ar uid
+Change
+.Nm Ap
+s user id to
+.Ar uid
+after binding the socket.
+This is only valid when run as root.
+.It Fl U
+Change
+.Nm Ap
+s user id, group id and supplementary group list according to the values of the
+.Ev UID ,
+.Ev GID
+and
+.Ev GIDLIST
+environment variables after binding the socket.
+This is only valid when run as root.
+This can be used with the
+.Xr s6-envuidgid 1
+program to easily script a service that binds to a privileged socket
+then drops its privileges to those of a named non-root account.
+.El
+.Sh ENVIRONMENT
+For each connection, an instance of <em>prog...</em> is spawned with
+the following variables set:
+.Bl -tag -width x
+.It Ev PROTO
+Always set to TCP.
+.It Ev TCPREMOTEIP
+Set to the originating address, in canonical IPv6 form.
+.It Ev TCPREMOTEPORT
+Set to the originating port.
+.It Ev TCPCONNNUM
+Set to the number of connections originating from the same IPv6
+address.
+.El
+.Sh SEE ALSO
+.Xr s6-applyuidgid 1 ,
+.Xr s6-envuidgid 1 ,
+.Xr s6-tcpserver4 1 ,
+.Xr s6-tcpserver6-socketbinder 1 ,
+.Xr s6-tcpserver6d 1
+.Pp
+[1]
+.Lk https://skarnet.org/software/skalibs/
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6-networking/s6-tcpserver6.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)
