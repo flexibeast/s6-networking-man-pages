@@ -1,4 +1,4 @@
-.Dd January 29, 2021
+.Dd February 4, 2021
 .Dt S6-SNTPCLOCK 1
 .Os
 .Sh NAME
@@ -49,10 +49,8 @@ initialized to the Unix Epoch.
 The solution is to first manually initialize the system clock with a
 program such as
 .Xr date 1
-or
-.Xr s6-clock 1
-to a closer time (such as 2013-01-01, which will be good up to 2047),
-then contact the NTP server.
+or s6-clock[1] to a closer time (such as 2013-01-01, which will be
+good up to 2047), then contact the NTP server.
 .Pp
 A less obvious problem with NTP is that it works with UTC time, which
 means that it gives inaccurate results when close to a leap second, up
@@ -65,9 +63,9 @@ and
 .Xr s6-taiclockd 1
 programs provide tools to do so.
 .Ss A word on ntpd
-From a Unix software engineering standpoint, the well-known ntpd[1]
+From a Unix software engineering standpoint, the well-known ntpd[2]
 program is an eldritch abomination.
-The main reason for it is that, just like its lovely cousin BIND[2],
+The main reason for it is that, just like its lovely cousin BIND[3],
 ntpd performs a lot of different tasks in a unique process, instead of
 separating what could, and should, be separated.
 This is confusing for both the programmer
@@ -106,7 +104,7 @@ with a loop over a simple program such as
 .Xr s6-clockadd 1 .
 There is also control of the clock skew, which s6-networking does not
 provide because there is no portable interface for that; there is such
-a tool in the clockspeed[3] package.
+a tool in the clockspeed[4] package.
 .Pp
 ntpd includes a complete cryptographic key management system for the
 crypto part of NTP.
@@ -209,19 +207,21 @@ By default,
 is 123.
 .El
 .Sh SEE ALSO
-.Xr s6-clock 1 ,
 .Xr s6-clockadd 1 ,
 .Xr s6-clockview 1 ,
 .Xr s6-taiclock 1 ,
 .Xr s6-taiclockd 1
 .Pp
 [1]
-.Lk https://doc.ntp.org/4.1.0/ntpd.htm
+.Lk https://skarnet.org/software/s6-portable-utils/s6-clock.html
 .Pp
 [2]
-.Lk https://www.isc.org/downloads/bind/
+.Lk https://doc.ntp.org/4.1.0/ntpd.htm
 .Pp
 [3]
+.Lk https://www.isc.org/downloads/bind/
+.Pp
+[4]
 .Lk https://cr.yp.to/clockspeed.html
 .Pp
 This man page is ported from the authoritative documentation at:
