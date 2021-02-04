@@ -1,0 +1,102 @@
+.Dd February 4, 2021
+.Dt S6-TCPSERVER6-SOCKETBINDER 1
+.Os
+.Sh NAME
+.Nm s6-tcpserver6-socketbinder
+.Nd bind an INET domain socket to an IPv6 address and port, then execute a program
+.Sh SYNOPSIS
+.Nm
+.Op Fl d | Fl D
+.Op Fl b Ar backlog
+.Op Fl M | Fl m
+.Op Fl B
+.Ar ip
+.Ar port
+.Ar prog...
+.Sh DESCRIPTION
+.Nm
+creates an TCP socket
+and binds it to IPv6 address
+.Ar ip ,
+port
+.Ar port .
+It prepares the socket to accept connections by calling
+.Xr listen 2 .
+.Pp
+It then execs into
+.Ar prog...
+with the open socket as its standard input.
+.Pp
+The socket is provided
+.Sy non-blocking by default .
+.Pp
+.Nm
+is part of a set of basic blocks used to build a flexible TCP/IPv6
+super-server.
+It normally should be given a command line crafted to make it execute
+into
+.Xr s6-tcpserver6d 1
+to accept connections from clients, or into a program such as
+.Xr s6-applyuidgid 1
+to drop privileges before doing so.
+.Pp
+The
+.Xr s6-tcpserver6 1
+program does exactly this.
+It implements a full TCP/IPv6 super-server by building a command line
+starting with
+.Nm
+and ending with
+.Xr s6-tcpserver6d 1
+followed by the application program, and executing into it.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl d
+Allow instant rebinding to the same IP and port even if it has been
+used not long ago - this is the
+.Dv SO_REUSEADDR
+flag to
+.Xr setsockopt 2
+and is generally used with server programs.
+This is the default.
+.It Fl D
+Disallow instant rebinding to the same path.
+.It Fl b Ar backlog
+Set a maximum of
+.Ar backlog
+backlog connections on the socket - extra connection attempts will
+rejected by the kernel.
+The default is
+.Dv SOMAXCONN ,
+i.e. the maximum number allowed by the system.
+If
+.Ar backlog
+is 0, then the socket will be created, but it
+.Sy will not be listening .
+.It Fl M
+Create a TCP socket.
+This is the default.
+.It Fl m
+Create a UDP socket.
+Note that by default UDP sockets are not connection-mode, and
+.Xr listen 2
+will fail - so you should always give the
+.Ql -b0
+option to
+.Nm
+along with
+.Ql -m .
+.It Fl B
+Create a blocking socket.
+Default is non-blocking.
+.El
+.Sh SEE ALSO
+.Xr s6-applyuidgid 1 ,
+.Xr s6-tcpserver6 1 ,
+.Xr s6-tcpserver6d 1
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6-networking/s6-tcpserver6-socketbinder.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

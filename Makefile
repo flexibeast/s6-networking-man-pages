@@ -3,6 +3,7 @@ man1 = $(MANPATH)/man1/
 man7 = $(MANPATH)/man7/
 
 man1_targets = \
+	minidentd.1 \
 	s6-clockadd.1 \
 	s6-clockview.1 \
 	s6-getservbyname.1 \
@@ -14,10 +15,14 @@ man1_targets = \
 	s6-tcpserver.1 \
 	s6-tcpserver-access.1.in \
 	s6-tcpserver4.1.in \
+	s6-tcpserver4-socketbinder.1.in \
 	s6-tcpserver4d.1.in \
 	s6-tcpserver6.1.in \
+	s6-tcpserver6-socketbinder.1.in \
 	s6-tcpserver6d.1.in \
+	s6-tlsc.1.in \
 	s6-tlsc-io.1.in \
+	s6-tlsclient.1.in \
 	s6-tlsd.1.in \
 	s6-tlsd-io.1.in \
 	s6-tlsserver.1.in \

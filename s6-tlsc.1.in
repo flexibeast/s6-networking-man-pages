@@ -1,0 +1,208 @@
+.Dd February 4, 2021
+.Dt S6-TLSC 1
+.Os
+.Sh NAME
+.Nm s6-tlsc
+.Nd establishes a TLS or SSL client connection over an existing TCP connection, then execs into an application
+.Sh SYNOPSIS
+.Nm
+.Op Fl S | Fl s
+.Op Fl Y | Fl y
+.Op Fl Z | Fl z
+.Op Fl v Ar verbosity
+.Op Fl K Ar kimeout
+.Op Fl k Ar servername
+.Op Fl 6 Ar rfd
+.Op Fl 7 Ar wfd
+.Op --
+.Ar prog...
+.Sh DESCRIPTION
+.Nm
+is meant to make network communications secure even for applications
+that do not natively support TLS/SSL.
+.Pp
+.Nm
+expects to have an open TCP connection it can talk to on its (by
+default) descriptors 6 (for reading) and 7 (for writing).
+.Pp
+It spawns an
+.Xr s6-tlsc-io 1
+child process that will initiate the TLS connection, perform the
+handshake (expecting a TLS server on the other side of the network)
+and maintain the TLS tunnel.
+.Pp
+When notified by
+.Xr s6-tlsc-io 1
+that the handshake has completed,
+.Nm
+.Xr exec 3 Ns
+s into
+.Ar prog... .
+.Pp
+The goal of the
+.Nm
+interface
+.Po
+and its server-side companion
+.Xr s6-tlsd 1
+.Pc
+is to
+make it so that if you have a client, run by the command line
+.Ql client...
+that speaks a cleartext protocol to a server run by the command line
+.Ql server... ,
+then if the server has the proper private key and certificate, and the
+client has the proper list of trust anchors, you can just change the
+client command line to
+.Ql s6-tlsc client...
+and the server command line to
+.Ql s6-tlsd server...
+without changing the client or the server themselves, and the
+communication between them will be secure.
+.Sh OPTIONS
+.Bl -tag -width x
+.It Fl v Ar verbosity
+Be more or less verbose.
+Default for
+.Ar verbosity
+is 1.
+0 is quiet, 2 is verbose, more than 2 is debug output.
+This option currently has no effect.
+.It Fl Z
+Do not clean the environment of the variables used by
+.Xr s6-tlsc-io 1
+before
+.Xr exec 3 Ap
+ing
+.Ar prog... .
+.It Fl z
+Clean the environment of the variables used by
+.Xr s6-tlsc-io 1
+before
+.Xr exec 3 Ap
+ing
+.Ar prog... .
+This is the default.
+.It Fl S
+Send a
+.Ql close_notify
+alert and break the connection when
+.Ar prog
+sends EOF.
+.It Fl s
+Transmit EOF by half-closing the TCP connection without using
+.Ql close_notify .
+This is the default.
+.It Fl Y
+Do not send a client certificate.
+This is the default.
+.It Fl y
+Send a client certificate.
+.It Fl k Ar servername
+Use Server Name Indication, and send
+.Ar servername .
+The default is not to use SNI, which may be a security risk.
+.It Fl K Ar kimeout
+If the peer fails to send data for
+.Ar kimeout
+milliseconds during the handshake, close the connection.
+The default is 0, which means infinite timeout (never kill the
+connection).
+This option is ignored by the
+.Ql libtls
+backend, which does not have a way to interrupt the handshake after a
+timeout.
+.It Fl 6 Ar fdr
+Expect an open file descriptor numbered
+.Ar fdr
+to read network (ciphertext) data from.
+Make sure
+.Ar prog
+also reads its data from its own fd
+.Ar fdr .
+Default is 6.
+.It Fl 7 Ar fdw
+Expect an open file descriptor numbered
+.Ar fdw
+to write network (ciphertext) data to.
+Make sure
+.Ar prog
+also writes its data to its own fd
+.Ar fdw .
+Default is 7.
+.El
+.Sh ENVIRONMENT
+.Ss Read
+.Nm
+does not expect to have any particular environment variables, but it spawns an
+.Xr s6-tlsc-io 1
+program that does.
+So it should pay attention to the following variables:
+.Bl -bullet -width x
+.It
+.Ev CADIR
+or
+.Ev CAFILE
+.It
+(If the -y option has been given)
+.Ev CERTFILE
+and
+.Ev KEYFILE
+.It
+.Ev TLS_UID
+and
+.Ev TLS_GID
+.El
+.Ss Written
+By default,
+.Ar prog...
+is run with all these variables
+.Em unset :
+.Ev CADIR ,
+.Ev CAFILE ,
+.Ev KEYFILE ,
+.Ev CERTFILE ,
+.Ev TLS_UID
+and
+.Ev TLS_GID .
+They're passed to the
+.Xr s6-tlsc-io 1
+child but not to
+.Ar prog... .
+The
+.Fl Z
+option prevents that behaviour.
+.Pp
+However,
+.Ar prog...
+is run with the following additional environment variables:
+.Bl -tag -width x
+.It Ev SSL_PROTOCOL
+Contains the protocol version: TLSv1, TLSv1.1, TLSv1.2...
+.It Ev SSL_CIPHER
+Contains the name of the cipher used.
+.El
+.Pp
+More similar environment variables containing information about the
+connection may be added in the future.
+.Sh EXIT STATUS
+.Bl -tag -width x
+.It 100
+Wrong usage.
+.It 111
+System call failed.
+.El
+.Pp
+If everything goes smoothly,
+.Nm
+does not exit, but
+.Xr exec 3 Ns
+s into
+.Ar prog...
+instead.
+.Sh SEE ALSO
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6-networking/s6-tlsc.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

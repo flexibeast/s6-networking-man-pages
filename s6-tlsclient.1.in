@@ -1,0 +1,189 @@
+.Dd February 4, 2021
+.Dt S6-TLSCLIENT 1
+.Os
+.Sh NAME
+.Nm s6-tlsclient
+.Nd UCSPI client tool[1] for TLS/SSL connections over INET domain sockets
+.Sh SYNOPSIS
+.Nm
+.Op Ar options
+.Op --
+.Ar host
+.Ar port
+.Ar prog...
+.Sh DESCRIPTION
+.Nm
+establishes a TCP connection to a server and a TLS transport over it,
+then executes into a program.
+.Pp
+.Nm
+rewrites itself into a command line involving:
+.Bl -bullet -width x
+.It
+.Xr s6-tcpclient 1 ,
+which establishes a TCP connection to host
+.Ar host
+port
+.Ar port .
+.It
+.Xr s6-tlsc 1 ,
+which establishes a TLS transport (client-side) over that connection.
+.It
+.Ar prog... ,
+your client program, which is executed into by
+.Xr s6-tlsc 1
+once the
+.Xr s6-tlsc-io 1
+child it has spawned has
+set up the TLS connection and performed the handshake.
+.El
+.Pp
+.Ar prog...
+is run with the same pid as
+.Nm .
+.Pp
+.Ar prog
+is expected to read from its peer on descriptor 6 and write to its
+peer on descriptor 7.
+Since there will be an
+.Xr s6-tlsc-io 1
+program between
+.Ar prog
+and the network to perform the TLS encryption/decryption, those
+descriptors will not be a network socket - they will be pipes.
+.Ss Server name determination for SNI
+If the
+.Fl H
+option is not given to
+.Nm ,
+then
+.Ar host
+will be used as the server name to verify.
+You can use the
+.Fl k
+option to override this default.
+Please note that if you use the
+.Fl H
+option and do not provide a server name via
+.Fl k ,
+.Sy SNI will not be used, which may be a security risk .
+.Sh OPTIONS
+.Nm
+accepts a myriad of options, most of which are passed as is to the
+correct executable.
+Not giving any options will generally work: the defaults are sensible.
+.Ss Options passed as-is to Xr s6-tcpclient 1
+.Bl -bullet -width x
+.It
+.Fl q ,
+.Fl Q ,
+.Fl v
+.It
+.Fl 4 ,
+.Fl 6
+.It
+.Fl d ,
+.Fl D
+.It
+.Fl r ,
+.fl R
+.It
+.Fl h ,
+.Fl H ,
+.Fl l Ar localname
+.It
+.Fl n ,
+.Fl N
+.It
+.Fl t Ar timeout
+.It
+.Fl i Ar localip ,
+.Fl p Ar localport
+.It
+.Fl T Ar timeoutconn
+.El
+.Ss Options passed as-is to Xr s6-tlsc 1
+.Bl -bullet -width x
+.It
+.Fl Z ,
+.Fl z
+.It
+.Fl S ,
+.Fl s
+.It
+.Fl Y ,
+.Fl y
+.It
+.Fl k Ar servername
+.It
+.Fl K Ar kimeout
+.El
+.Sh ENVIRONMENT
+.Ss Read
+The following variables should be set before invoking
+.Nm ,
+because they will be used by
+.Xr s6-tlsc-io</a> 1 :
+.Bl -tag -width x
+.It Ev CADIR
+.It Ev CAFILE
+(alternative to CADIR)
+.It Ev KEYFILE
+(if you're using a client certificate)
+.It Ev CERTFILE
+(if you're using a client certificate)
+.It Ev TLS_UID and Ev TLS_GID
+(if you run
+.Nm
+as root)
+.El
+.Pp
+Setting either CADIR or CAFILE is mandatory.
+.Ss Written
+.Ar prog...
+is run with the following variables added to, or removed from, its
+environment by
+.Xr s6-tcpclient 1 :
+.Bl -tag -width x
+.It Ev PROTO
+.It Ev TCPREMOTEIP
+.It Ev TCPREMOTEPORT
+.It Ev TCPREMOTEHOST
+.It Ev TCPLOCALHOST
+.It Ev TCPREMOTEINFO
+.El
+.Pp
+Unless the
+.Fl Z
+option is given to
+.Nm ,
+the
+.Ev CADIR ,
+.Ev CAFILE ,
+.Ev KEYFILE ,
+.Ev CERTFILE ,
+.Ev TLS_UID
+and
+.Ev TLS_GID
+variables will not appear in
+.Ar prog Ap
+s environment.
+.Sh EXAMPLES
+.Dl CADIR=/etc/ssl/certs s6-tlsclient skarnet.org 443 s6-ioconnect
+.Pp
+This will open a connection to the skarnet.org web server over TLS and
+verify its certificate via the trust anchors listed in the
+.Pa /etc/ssl/certs
+directory.
+It will then branch your terminal to it: try typing
+.Ql GET / HTTP/1.0
+then hitting return twice.
+.Sh SEE ALSO
+[1]
+.Lk https://cr.yp.to/proto/ucspi.txt
+.Pp
+This man page is ported from the authoritative documentation at:
+.Lk https://skarnet.org/software/s6-networking/s6-tlsclient.html
+.Sh AUTHORS
+.An Laurent Bercot
+.An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)
