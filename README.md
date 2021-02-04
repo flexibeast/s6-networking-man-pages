@@ -1,8 +1,7 @@
 # Summary
 
-This work-in-progress repository will provide
-[mdoc(7)](https://man.openbsd.org/mdoc.7) ports of the HTML
-documentation for the [s6-networking
+This repository provides [mdoc(7)](https://man.openbsd.org/mdoc.7)
+ports of the HTML documentation for the [s6-networking
 suite](http://skarnet.org/software/s6-networking/). The HTML version
 on the s6-networking site is authoritative; in the event of semantic
 differences between an HTML original and its port, please open an
