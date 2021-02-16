@@ -1,4 +1,4 @@
-.Dd February 1, 2021
+.Dd February 16, 2021
 .Dt S6-UCSPITLSD 1
 .Os
 .Sh NAME
@@ -200,9 +200,14 @@ and the child process execs into
 If the parent dies or closes its control socket before sending a
 command to start TLS, the child exits 0.
 .Sh SEE ALSO
+.Xr s6-tlsc 1 ,
 .Xr s6-tlsc-io 1 ,
+.Xr s6-tlsclient 1 ,
 .Xr s6-tlsd 1 ,
-.Xr s6-tlsd-io 1
+.Xr s6-tlsd-io 1 ,
+.Xr s6-tlsserver 1 ,
+.Xr s6-ucspitlsc 1 ,
+.Xr s6-tls 7
 .Pp
 [1]
 .Lk https://web.archive.org/web/20150311223933/http://www.suspectclass.com/sgifford/ucspi-tls/ucspi-tls.txt
