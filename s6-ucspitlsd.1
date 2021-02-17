@@ -101,11 +101,11 @@ nor the
 .Fl y
 option, is not to require a client certificate at all.
 .It Fl K Ar kimeout
-Close the connection if
+Close the connection if the handshake takes more than
 .Ar kimeout
-milliseconds elapse without any data being received from either side.
-The default is 0, which means infinite timeout (never kill the
-connection).
+milliseconds to complete.
+The default is 0, which means infinite timeout: let the handshake
+complete at its own pace, no matter how slow.
 .El
 .Sh ENVIRONMENT
 .Ss Read

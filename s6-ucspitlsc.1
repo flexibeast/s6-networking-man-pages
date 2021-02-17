@@ -99,11 +99,11 @@ Use Server Name Indication, and send
 .Ar servername .
 The default is not to use SNI, which may be a security risk.
 .It Fl K Ar kimeout
-Close the connection if
+Close the connection if the handshake takes more than
 .Ar kimeout
-milliseconds elapse without any data being received from either side.
-The default is 0, which means infinite timeout (never kill the
-connection).
+milliseconds to complete.
+The default is 0, which means infinite timeout: let the handshake
+complete at its own pace, no matter how slow.
 .It Fl 6 Ar fdr
 Expect an open file descriptor numbered
 .Ar fdr

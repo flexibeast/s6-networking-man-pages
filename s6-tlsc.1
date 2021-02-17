@@ -181,6 +181,12 @@ is run with the following additional environment variables:
 Contains the protocol version: TLSv1, TLSv1.1, TLSv1.2...
 .It Ev SSL_CIPHER
 Contains the name of the cipher used.
+.It Ev SSL_TLS_SNI_SERVERNAME
+Contains
+.Ar servername ,
+if the
+.Fl k
+option has been given; otherwise it is removed from the environment.
 .El
 .Pp
 More similar environment variables containing information about the

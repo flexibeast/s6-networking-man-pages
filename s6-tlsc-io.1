@@ -157,10 +157,6 @@ If the peer fails to send data for
 milliseconds during the handshake, close the connection.
 The default is 0, which means infinite timeout (never kill the
 connection).
-This option is ignored by the
-.Ql libtls
-backend, which does not have a way to interrupt the handshake after a
-timeout.
 .It Fl d Ar notif
 Handshake notification.
 .Ar notif

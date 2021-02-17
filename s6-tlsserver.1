@@ -172,7 +172,6 @@ or
 .Fl Y ,
 .Fl y
 .It
-.Fl k Ar servername
 .Fl K Ar kimeout
 .El
 .Ss Options passed to Xr s6-applyuidgid 1
@@ -293,7 +292,7 @@ user
 .Po
 .Ql 65534:65534 Ns
 .Pc .
-The server is authentified by the certificate in
+The server is authenticated by the certificate in
 .Pa /etc/ssl/public/mycert.pem
 that it sends to the client, and the private key in
 .Pa /etc/ssl/private/mykey.der
