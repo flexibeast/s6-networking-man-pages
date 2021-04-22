@@ -1,4 +1,4 @@
-.Dd February 16, 2021
+.Dd April 22, 2021
 .Dt S6-TLSD 1
 .Os
 .Sh NAME
@@ -112,10 +112,6 @@ If the peer fails to send data for
 milliseconds during the handshake, close the connection.
 The default is 0, which means infinite timeout (never kill the
 connection).
-This option is ignored by the
-.Ql libtls
-backend, which does not have a way to interrupt the handshake after a
-timeout.
 .El
 .Sh ENVIRONMENT
 .Ss Read
