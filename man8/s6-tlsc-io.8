@@ -1,5 +1,5 @@
-.Dd February 16, 2021
-.Dt S6-TLSC-IO 1
+.Dd September 29, 2021
+.Dt S6-TLSC-IO 8
 .Os
 .Sh NAME
 .Nm s6-tlsc-io
@@ -228,7 +228,7 @@ different privileges.
 Note that
 .Ar prog...
 should drop its own root privileges by its own means: the
-.Xr s6-applyuidgid 1
+.Xr s6-applyuidgid 8
 program is a chainloading way of doing it.
 .Sh EXIT STATUS
 .Bl -tag -width x
@@ -247,15 +247,15 @@ Wrong usage.
 System call failed.
 .El
 .Sh SEE ALSO
-.Xr s6-applyuidgid 1 ,
-.Xr s6-tlsc 1 ,
-.Xr s6-tlsclient 1 ,
-.Xr s6-tlsd 1 ,
-.Xr s6-tlsd-io 1 ,
-.Xr s6-tlsserver 1 ,
-.Xr s6-ucspitlsc 1 ,
-.Xr s6-ucspitlsd 1 ,
-.Xr s6-tls 7
+.Xr s6-tls 7 ,
+.Xr s6-applyuidgid 8 ,
+.Xr s6-tlsc 8 ,
+.Xr s6-tlsclient 8 ,
+.Xr s6-tlsd 8 ,
+.Xr s6-tlsd-io 8 ,
+.Xr s6-tlsserver 8 ,
+.Xr s6-ucspitlsc 8 ,
+.Xr s6-ucspitlsd 8
 .Pp
 [1]
 .Lk https://bearssl.org/

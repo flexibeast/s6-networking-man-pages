@@ -20,5 +20,5 @@ HTML versions can be produced with
 [mandoc(1)](https://man.openbsd.org/mandoc.1)'s `-T` flag:
 
 ```
-$ mandoc -T html s6-clockadd.1 > s6-clockadd.1.html
+$ mandoc -T html man8/s6-clockadd.8 > s6-clockadd.8.html
 ```

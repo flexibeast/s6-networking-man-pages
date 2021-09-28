@@ -1,5 +1,5 @@
-.Dd February 16, 2021
-.Dt S6-TCPSERVER6 1
+.Dd September 29, 2021
+.Dt S6-TCPSERVER6 8
 .Os
 .Sh NAME
 .Nm s6-tcpserver6
@@ -51,7 +51,7 @@ of programs that perform those duties.
 will only serve real IPv6 addresses; it does not default to an IPv4
 address.
 The
-.Xr s6-tcpserver4 1
+.Xr s6-tcpserver4 8
 program should be used to serve IPv4 addresses.
 .Pp
 .Nm
@@ -60,10 +60,10 @@ IPv6 support.
 .Pp
 In previous releases of s6-networking, s6-tcpserver6 was
 monolithic: it did the work of
-.Xr s6-tcpserver6-socketbinder 1 ,
-.Xr s6-applyuidgid 1
+.Xr s6-tcpserver6-socketbinder 8 ,
+.Xr s6-applyuidgid 8
 and
-.Xr s6-tcpserver6d 1
+.Xr s6-tcpserver6d 8
 itself.
 The functionality has now been split into several different programs
 because some service startup schemes require the daemon to get its
@@ -160,7 +160,7 @@ and
 environment variables after binding the socket.
 This is only valid when run as root.
 This can be used with the
-.Xr s6-envuidgid 1
+.Xr s6-envuidgid 8
 program to easily script a service that binds to a privileged socket
 then drops its privileges to those of a named non-root account.
 .El
@@ -179,15 +179,15 @@ Set to the number of connections originating from the same IPv6
 address.
 .El
 .Sh SEE ALSO
-.Xr s6-applyuidgid 1 ,
-.Xr s6-envuidgid 1 ,
-.Xr s6-tcpclient 1 ,
-.Xr s6-tcpserver 1 ,
-.Xr s6-tcpserver4 1 ,
-.Xr s6-tcpserver4-socketbinder 1 ,
-.Xr s6-tcpserver4d 1 ,
-.Xr s6-tcpserver6-socketbinder 1 ,
-.Xr s6-tcpserver6d 1
+.Xr s6-applyuidgid 8 ,
+.Xr s6-envuidgid 8 ,
+.Xr s6-tcpclient 8 ,
+.Xr s6-tcpserver 8 ,
+.Xr s6-tcpserver4 8 ,
+.Xr s6-tcpserver4-socketbinder 8 ,
+.Xr s6-tcpserver4d 8 ,
+.Xr s6-tcpserver6-socketbinder 8 ,
+.Xr s6-tcpserver6d 8
 .Pp
 [1]
 .Lk https://skarnet.org/software/skalibs/

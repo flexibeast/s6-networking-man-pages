@@ -1,9 +1,9 @@
-.Dd February 16, 2021
-.Dt S6-TCPSERVER6-SOCKETBINDER 1
+.Dd September 29, 2021
+.Dt S6-TCPSERVER4-SOCKETBINDER 8
 .Os
 .Sh NAME
-.Nm s6-tcpserver6-socketbinder
-.Nd bind an INET domain socket to an IPv6 address and port, then execute a program
+.Nm s6-tcpserver4-socketbinder
+.Nd bind an INET domain socket to an IPv4 address and port, then execute a program
 .Sh SYNOPSIS
 .Nm
 .Op Fl d | Fl D
@@ -15,15 +15,16 @@
 .Ar prog...
 .Sh DESCRIPTION
 .Nm
-creates an TCP socket
-and binds it to IPv6 address
+creates a TCP socket and binds it to IPv4 address
 .Ar ip ,
 port
 .Ar port .
 It prepares the socket to accept connections by calling
 .Xr listen 2 .
 .Pp
-It then execs into
+It then
+.Xr exec 3
+s into
 .Ar prog...
 with the open socket as its standard input.
 .Pp
@@ -31,23 +32,23 @@ The socket is provided
 .Sy non-blocking by default .
 .Pp
 .Nm
-is part of a set of basic blocks used to build a flexible TCP/IPv6
+is part of a set of basic blocks used to build a flexible TCP/IPv4
 super-server.
 It normally should be given a command line crafted to make it execute
 into
-.Xr s6-tcpserver6d 1
+.Xr s6-tcpserver4d 8
 to accept connections from clients, or into a program such as
-.Xr s6-applyuidgid 1
+.Xr s6-applyuidgid 8
 to drop privileges before doing so.
 .Pp
 The
-.Xr s6-tcpserver6 1
+.Xr s6-tcpserver4 8
 program does exactly this.
-It implements a full TCP/IPv6 super-server by building a command line
+It implements a full TCP/IPv4 super-server by building a command line
 starting with
 .Nm
 and ending with
-.Xr s6-tcpserver6d 1
+.Xr s6-tcpserver4d 8
 followed by the application program, and executing into it.
 .Sh OPTIONS
 .Bl -tag -width x
@@ -91,17 +92,17 @@ Create a blocking socket.
 Default is non-blocking.
 .El
 .Sh SEE ALSO
-.Xr s6-applyuidgid 1 ,
-.Xr s6-tcpclient 1 ,
-.Xr s6-tcpserver 1 ,
-.Xr s6-tcpserver4 1 ,
-.Xr s6-tcpserver4-socketbinder 1 ,
-.Xr s6-tcpserver4d 1 ,
-.Xr s6-tcpserver6 1 ,
-.Xr s6-tcpserver6d 1
+.Xr s6-applyuidgid 8 ,
+.Xr s6-tcpclient 8 ,
+.Xr s6-tcpserver 8 ,
+.Xr s6-tcpserver4 8 ,
+.Xr s6-tcpserver4d 8 ,
+.Xr s6-tcpserver6 8 ,
+.Xr s6-tcpserver6-socketbinder 8 ,
+.Xr s6-tcpserver6d 8
 .Pp
 This man page is ported from the authoritative documentation at:
-.Lk https://skarnet.org/software/s6-networking/s6-tcpserver6-socketbinder.html
+.Lk https://skarnet.org/software/s6-networking/s6-tcpserver4-socketbinder.html
 .Sh AUTHORS
 .An Laurent Bercot
 .An Alexis Ao Mt flexibeast@gmail.com Ac (man page port)

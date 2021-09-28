@@ -1,5 +1,5 @@
-.Dd February 16, 2021
-.Dt S6-TLSSERVER 1
+.Dd September 29, 2021
+.Dt S6-TLSSERVER 8
 .Os
 .Sh NAME
 .Nm s6-tlsserver
@@ -21,20 +21,20 @@ executes into a program.
 rewrites itself into a command line involving:
 .Bl -bullet -width x
 .It
-.Xr s6-tcpserver 1 ,
+.Xr s6-tcpserver 8 ,
 which listens to TCP connections on IP address
 .Ar ip
 port
 .Ar port
 and forks a command line for every connection.
 Note that
-.Xr s6-tcpserver 1
+.Xr s6-tcpserver 8
 also rewrites itself into a more complex command line
 .Po
 the final long-lived process being
-.Xr s6-tcpserver4d 1
+.Xr s6-tcpserver4d 8
 or
-.Xr s6-tcpserver6d 1
+.Xr s6-tcpserver6d 8
 .Pc ,
 so your end command line may look a lot longer in
 .Xr ps 1
@@ -42,23 +42,23 @@ than what you originally wrote.
 This is normal and healthy.
 .It
 (If applicable)
-.Xr s6-tcpserver-access 1 ,
+.Xr s6-tcpserver-access 8 ,
 which performs TCP access control and various operations on the TCP
 connection.
 .It
-.Xr s6-tlsd 1 ,
+.Xr s6-tlsd 8 ,
 which establishes a TLS transport (server-side) over a connection, via
 an
-.Xr s6-tlsd-io 1
+.Xr s6-tlsd-io 8
 child process.
 .It
 (If applicable)
-.Xr s6-applyuidgid 1 ,
+.Xr s6-applyuidgid 8 ,
 which drops root privileges.
 .It
 .Ar prog... ,
 your client program, which is run with the
-.Xr s6-tlsd 1 .
+.Xr s6-tlsd 8 .
 .El
 .Pp
 It runs until it is killed by a signal.
@@ -67,7 +67,7 @@ It runs until it is killed by a signal.
 is expected to read from its peer on its standard input and write to
 its peer on its standard output.
 Since there will be an
-.Xr s6-tlsd-io 1
+.Xr s6-tlsd-io 8
 program between
 .Ar prog
 and the network to perform the SSL encryption/decryption, those
@@ -75,9 +75,9 @@ descriptors will not be a network socket - they will be pipes.
 .Ss Signals
 .Nm
 reacts to the same signals as
-.Xr s6-tcpserver4d 1
+.Xr s6-tcpserver4d 8
 or
-.Xr s6-tcpserver6d 1 ,
+.Xr s6-tcpserver6d 8 ,
 one of which is the long-lived process hanging around.
 .Sh OPTIONS
 .Nm
@@ -92,7 +92,7 @@ rules.
 .It
 .Fl e
 indicates that
-.Xr s6-tcpserver-access 1
+.Xr s6-tcpserver-access 8
 should be invoked, even if no other option requires it, even in the
 absence of an access control ruleset.
 This ensures that
@@ -176,7 +176,7 @@ or
 .It
 .Fl k Ar snilevel
 .El
-.Ss Options passed to Xr s6-applyuidgid 1
+.Ss Options passed to s6-applyuidgid
 .Bl -bullet -width x
 .It
 .Fl u Ar uid ,
@@ -195,7 +195,7 @@ The following variables should be set before invoking
 .Nm ,
 because they will be used by
 every
-.Xr s6-tlsd 1
+.Xr s6-tlsd 8
 invocation:
 .Bl -tag -width x
 .It Ev KEYFILE
@@ -222,11 +222,11 @@ is mandatory.
 .Ar prog...
 is run with the following variables added to,
 or removed from, its environment by
-.Xr s6-tcpserver4d 1
+.Xr s6-tcpserver4d 8
 or
-.Xr s6-tcpserver6d 1 ,
+.Xr s6-tcpserver6d 8 ,
 and possibly by
-.Xr s6-tcpserver-access 1 :
+.Xr s6-tcpserver-access 8 :
 .Bl -tag -width x
 .It Ev PROTO
 .It Ev TCPREMOTEIP
@@ -247,9 +247,9 @@ option has been given), it is possible that
 .Ar prog Ap
 s environment undergoes more modifications.
 Also, since
-.Xr s6-tlsd 1
+.Xr s6-tlsd 8
 is always run after
-.Xr s6-tcpserver-access 1 ,
+.Xr s6-tcpserver-access 8 ,
 it is possible to set different TLS/SSL parameters
 .Po
 typically a different
@@ -300,19 +300,19 @@ that it sends to the client, and the private key in
 .Pa /etc/ssl/private/mykey.der
 that it keeps to itself.
 .Sh SEE ALSO
-.Xr s6-applyuidgid 1 ,
-.Xr s6-tcpserver 1 ,
-.Xr s6-tcpserver-access 1 ,
-.Xr s6-tcpserver4d 1 ,
-.Xr s6-tcpserver6d 1 ,
-.Xr s6-tlsc 1 ,
-.Xr s6-tlsc-io 1 ,
-.Xr s6-tlsclient 1 ,
-.Xr s6-tlsd 1 ,
-.Xr s6-tlsd-io 1 ,
-.Xr s6-ucspitlsc 1 ,
-.Xr s6-ucspitlsd 1 ,
-.Xr s6-tls 7
+.Xr s6-tls 7 ,
+.Xr s6-applyuidgid 8 ,
+.Xr s6-tcpserver 8 ,
+.Xr s6-tcpserver-access 8 ,
+.Xr s6-tcpserver4d 8 ,
+.Xr s6-tcpserver6d 8 ,
+.Xr s6-tlsc 8 ,
+.Xr s6-tlsc-io 8 ,
+.Xr s6-tlsclient 8 ,
+.Xr s6-tlsd 8 ,
+.Xr s6-tlsd-io 8 ,
+.Xr s6-ucspitlsc 8 ,
+.Xr s6-ucspitlsd 8
 .Pp
 [1]
 .Lk https://cr.yp.to/proto/ucspi.txt

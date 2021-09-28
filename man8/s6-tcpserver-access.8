@@ -1,5 +1,5 @@
-.Dd September 28, 2021
-.Dt S6-TCPSERVER-ACCESS 1
+.Dd September 29, 2021
+.Dt S6-TCPSERVER-ACCESS 8
 .Os
 .Sh NAME
 .Nm s6-tcpserver-access
@@ -20,9 +20,9 @@
 .Sh DESCRIPTION
 .Nm
 is meant to be run after
-.Xr s6-tcpserver 1
+.Xr s6-tcpserver 8
 and before the application program on the
-.Xr s6-tcpserver 1
+.Xr s6-tcpserver 8
 command line, just like tcpwrappers'
 .Pa tcpd
 program.
@@ -31,14 +31,14 @@ It additionally performs some fine-tuning on a TCP socket.
 .Nm
 checks it is run under a UCSPI server tool
 such as
-.Xr s6-tcpserver 1 ,
-.Xr s6-tcpserver4 1
+.Xr s6-tcpserver 8 ,
+.Xr s6-tcpserver4 8
 or
-.Xr s6-tcpserver6 1 ,
+.Xr s6-tcpserver6 8 ,
 or their stripped-down versions
-.Xr s6-tcpserver4d 1
+.Xr s6-tcpserver4d 8
 or
-.Xr s6-tcpserver6d 1 .
+.Xr s6-tcpserver6d 8 .
 .Pp
 It checks that the remote end of the connection fits the accepted
 criteria defined by the database contained in
@@ -58,9 +58,9 @@ instructions to override
 .Pp
 .Nm
 works with
-.Xr s6-tcpserver4d 1 ,
+.Xr s6-tcpserver4d 8 ,
 handling IPv4 addresses, as well as
-.Xr s6-tcpserver6d 1 ,
+.Xr s6-tcpserver6d 8 ,
 handling IPv6 addresses.
 It will automatically detect the remote address type and match it
 against the correct subdatabase.
@@ -97,7 +97,7 @@ in the filesystem.
 .El
 .Pp
 The exact format of the ruleset is described on the
-.Xr s6-accessrules-cdb-from-fs 1
+.Xr s6-accessrules-cdb-from-fs 8
 page.
 .Pp
 .Nm
@@ -184,13 +184,13 @@ subdirectories and
 .Pa exec
 files it finds in the matching rule of the ruleset, as explained in
 the
-.Xr s6-accessrules-cdb-from-fs 1
+.Xr s6-accessrules-cdb-from-fs 8
 page.
 .Pp
 An
 .Pa env
 subdirectory is interpreted as if the
-.Xr s6-envdir 1
+.Xr s6-envdir 8
 command had been called before executing
 .Ar prog :
 the environment is modified according to the contents of
@@ -355,14 +355,14 @@ Also, the access rules database can instruct
 to set up, or unset, more environment variables, depending on the
 client address.
 .Sh SEE ALSO
-.Xr s6-accessrules-cdb-from-fs 1 ,
-.Xr s6-envdir 1 ,
-.Xr s6-tcpserver 1 ,
-.Xr s6-tcpserver4 1 ,
-.Xr s6-tcpserver4d 1 ,
-.Xr s6-tcpserver6 1 ,
-.Xr s6-tcpserver6d 1 ,
-.Xr s6-accessrules 7
+.Xr s6-accessrules 7 ,
+.Xr s6-accessrules-cdb-from-fs 8 ,
+.Xr s6-envdir 8 ,
+.Xr s6-tcpserver 8 ,
+.Xr s6-tcpserver4 8 ,
+.Xr s6-tcpserver4d 8 ,
+.Xr s6-tcpserver6 8 ,
+.Xr s6-tcpserver6d 8
 .Pp
 [1]
 .Lk https://en.wikipedia.org/wiki/Cdb_(software)

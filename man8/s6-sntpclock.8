@@ -1,5 +1,5 @@
-.Dd February 16, 2021
-.Dt S6-SNTPCLOCK 1
+.Dd September 29, 2021
+.Dt S6-SNTPCLOCK 8
 .Os
 .Sh NAME
 .Nm s6-sntpclock
@@ -33,9 +33,9 @@ system clock and the one given by the server.
 .Pp
 It prints the difference to stdout in a format understood
 by
-.Xr s6-clockadd 1
+.Xr s6-clockadd 8
 and
-.Xr s6-clockview 1 .
+.Xr s6-clockview 8 .
 It then exits 0.
 .Pp
 There are a lot of infelicities in the NTP protocol (which SNTP is
@@ -58,9 +58,9 @@ to one second off when used during a leap second, and this is bound to
 the use of UTC: there is nothing you can do about it.
 The only solution to get reliable results even around a leap second is
 to use linear time such as TAI; the
-.Xr s6-taiclock 1
+.Xr s6-taiclock 8
 and
-.Xr s6-taiclockd 1
+.Xr s6-taiclockd 8
 programs provide tools to do so.
 .Ss A word on ntpd
 From a Unix software engineering standpoint, the well-known ntpd[2]
@@ -101,7 +101,7 @@ Those are already 3 separate tasks.
 Local system clock management itself involves several duties.
 There is the regular setting of the system clock, which can be done
 with a loop over a simple program such as
-.Xr s6-clockadd 1 .
+.Xr s6-clockadd 8 .
 There is also control of the clock skew, which s6-networking does not
 provide because there is no portable interface for that; there is such
 a tool in the clockspeed[4] package.
@@ -134,7 +134,7 @@ However, I wish that the main NTP implementation weren't written as a
 big fat clumsy process running as root.
 .Nm
 together with
-.Xr s6-clockadd 1
+.Xr s6-clockadd 8
 aims to provide a small, simple tool to keep system clocks, especially
 in embedded devices, synchronized to a NTP server.
 .Sh OPTIONS
@@ -207,10 +207,10 @@ By default,
 is 123.
 .El
 .Sh SEE ALSO
-.Xr s6-clockadd 1 ,
-.Xr s6-clockview 1 ,
-.Xr s6-taiclock 1 ,
-.Xr s6-taiclockd 1
+.Xr s6-clockadd 8 ,
+.Xr s6-clockview 8 ,
+.Xr s6-taiclock 8 ,
+.Xr s6-taiclockd 8
 .Pp
 [1]
 .Lk https://skarnet.org/software/s6-portable-utils/s6-clock.html

@@ -1,10 +1,10 @@
-.Dd February 16, 2021
-.Dt S6-TCPSERVER6D 1
+.Dd September 29, 2021
+.Dt S6-TCPSERVER6D 8
 .Os
 .Sh NAME
 .Nm s6-tcpserver6d
 .Nd the serving part of the
-.Xr s6-tcpserver6 1
+.Xr s6-tcpserver6 8
 super-server
 .Sh SYNOPSIS
 .Nm
@@ -42,7 +42,7 @@ very fast process to serve connections with the least possible
 overhead.
 Features such as additional environment variables, access control and
 DNS resolution are provided via the
-.Xr s6-tcpserver-access 1
+.Xr s6-tcpserver-access 8
 program.
 .Pp
 .Nm
@@ -50,7 +50,7 @@ is meant to be
 .Xr execve 2 Ap
 d into by a program that gets the listening socket.
 That program is normally
-.Xr s6-tcpserver6-socketbinder 1 ,
+.Xr s6-tcpserver6-socketbinder 8 ,
 which creates the socket itself; but it can be a different one if the
 socket is to be retrieved by another means, for instance by fd-passing
 from a fd-holding daemon (some people call this
@@ -123,15 +123,15 @@ Set to the originating port.
 Set to the number of connections originating from the same IP address.
 .El
 .Sh SEE ALSO
-.Xr s6-tcpclient 1 ,
-.Xr s6-tcpserver 1 ,
-.Xr s6-tcpserver-access 1 ,
-.Xr s6-tcpserver4 1 ,
-.Xr s6-tcpserver4-socketbinder 1 ,
-.Xr s6-tcpserver4d 1 ,
-.Xr s6-tcpserver6 1 ,
-.Xr s6-tcpserver6-socketbinder 1 ,
-.Xr s6-notifywhenup 7
+.Xr s6-notifywhenup 7 ,
+.Xr s6-tcpclient 8 ,
+.Xr s6-tcpserver 8 ,
+.Xr s6-tcpserver-access 8 ,
+.Xr s6-tcpserver4 8 ,
+.Xr s6-tcpserver4-socketbinder 8 ,
+.Xr s6-tcpserver4d 8 ,
+.Xr s6-tcpserver6 8 ,
+.Xr s6-tcpserver6-socketbinder 8
 .Pp
 [1]
 .Lk https://cr.yp.to/ucspi-tcp/tcpserver.html

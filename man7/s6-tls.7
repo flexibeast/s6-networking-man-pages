@@ -1,4 +1,4 @@
-.Dd February 16, 2021
+.Dd September 29, 2021
 .Dt S6-TLS 7
 .Os
 .Sh NAME
@@ -24,14 +24,14 @@ you're interested in using a client or a server.
 .Pp
 Of course, they do not have to be used together.
 You can run a TLS-enabled super-server via
-.Xr s6-tlsserver 1
+.Xr s6-tlsserver 8
 and it will work with any client speaking the correct TLS-enabled
 protocol, not only
-.Xr s6-tlsclient 1 .
+.Xr s6-tlsclient 8 .
 .Ss The core TLS engine: s6-tlsc-io and s6-tlsd-io
-.Xr s6-tlsc-io 1
+.Xr s6-tlsc-io 8
 and
-.Xr s6-tlsd-io 1
+.Xr s6-tlsd-io 8
 are the only programs that actually perform TLS operations; the only
 ones that are linked against the BearSSL or LibreSSL libraries.
 .Pp
@@ -60,15 +60,15 @@ Other programs in the
 set perform various operations such as Unix file descriptor plumbing
 in order to provide a specific interface, but they always end up
 spawning an
-.Xr s6-tlsc-io 1
+.Xr s6-tlsc-io 8
 or
-.Xr s6-tlsd-io 1
+.Xr s6-tlsd-io 8
 child that will handle the actual TLS management for them.
 .Ss Regular TLSification of a service: s6-tlsc and s6-tlsd
 The
-.Xr s6-tlsc 1
+.Xr s6-tlsc 8
 and
-.Xr s6-tlsd 1
+.Xr s6-tlsd 8
 programs are
 .Dq immediate encryption Ns
 -type programs.
@@ -79,9 +79,9 @@ servers); their goal is to provide this application with transparent
 encryption.
 .Pp
 They first spawn an
-.Xr s6-tlsc-io 1
+.Xr s6-tlsc-io 8
 or
-.Xr s6-tlsd-io 1
+.Xr s6-tlsd-io 8
 child to initialize the TLS connection.
 .Pp
 When the TLS handshake has completed, they exec into the rest of their
@@ -99,9 +99,9 @@ whole lifetime of the application, or until the application closes the
 fds it uses to communicate with (what it thinks is) the network.
 .Ss Opportunistic TLS: s6-ucspitlsc and s6-ucspitlsd
 The
-.Xr s6-ucspitlsc 1
+.Xr s6-ucspitlsc 8
 and
-.Xr s6-ucspitlsd 1
+.Xr s6-ucspitlsd 8
 programs are
 .Dq delayed encryption Ns
 -type programs.
@@ -118,9 +118,9 @@ The child stays and waits for a command.
 .Pp
 When the
 application sends a command to start TLS, the child execs into
-.Xr s6-tlsc-io 1
+.Xr s6-tlsc-io 8
 or
-.Xr s6-tlsd-io 1 ,
+.Xr s6-tlsd-io 8 ,
 which initializes a TLS connection and performs a handshake.
 .Pp
 The application then communicates via the fds that have been provided
@@ -128,9 +128,9 @@ to it via the ucspi-tls protocol.
 Those fds go through the TLS engine.
 .Ss High-level client connections and super-servers: s6-tlsclient and s6-tlsserver
 The
-.Xr s6-tlsclient 1
+.Xr s6-tlsclient 8
 and
-.Xr s6-tlsserver 1
+.Xr s6-tlsserver 8
 programs are high-level wrappers around TCP client and server
 functionality, followed by the establishment of a TLS tunnel, followed
 by the execution of an application.
@@ -138,32 +138,32 @@ by the execution of an application.
 They're meant to provide simpler interfaces over long, complex command
 lines.
 .Pp
-.Xr s6-tlsclient 1
+.Xr s6-tlsclient 8
 rewrites itself into a command line involving
-.Xr s6-tcpclient 1
+.Xr s6-tcpclient 8
 and
-.Xr s6-tlsc 1 .
+.Xr s6-tlsc 8 .
 .Pp
-.Xr s6-tlsserver 1
+.Xr s6-tlsserver 8
 rewrites itself into a command line involving (depending on the given options)
-.Xr s6-tcpserver 1 ,
-.Xr s6-tcpserver-access 1 ,
-.Xr s6-tlsd 1 ,
+.Xr s6-tcpserver 8 ,
+.Xr s6-tcpserver-access 8 ,
+.Xr s6-tlsd 8 ,
 and
-.Xr s6-applyuidgid 1 .
+.Xr s6-applyuidgid 8 .
 .Sh SEE ALSO
-.Xr s6-applyuidgid 1 ,
-.Xr s6-tcpclient 1 ,
-.Xr s6-tcpserver 1 ,
-.Xr s6-tcpserver-access 1 ,
-.Xr s6-tlsc 1 ,
-.Xr s6-tlsc-io 1 ,
-.Xr s6-tlsclient 1 ,
-.Xr s6-tlsd 1 ,
-.Xr s6-tlsd-io 1 ,
-.Xr s6-tlsserver 1 ,
-.Xr s6-ucspitlsc 1 ,
-.Xr s6-ucspitlsd 1
+.Xr s6-applyuidgid 8 ,
+.Xr s6-tcpclient 8 ,
+.Xr s6-tcpserver 8 ,
+.Xr s6-tcpserver-access 8 ,
+.Xr s6-tlsc 8 ,
+.Xr s6-tlsc-io 8 ,
+.Xr s6-tlsclient 8 ,
+.Xr s6-tlsd 8 ,
+.Xr s6-tlsd-io 8 ,
+.Xr s6-tlsserver 8 ,
+.Xr s6-ucspitlsc 8 ,
+.Xr s6-ucspitlsd 8
 .Pp
 [1]
 .Lk https://web.archive.org/web/20150311223933/http://www.suspectclass.com/sgifford/ucspi-tls/ucspi-tls.txt

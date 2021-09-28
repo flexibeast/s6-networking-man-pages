@@ -1,5 +1,5 @@
-.Dd September 28, 2021
-.Dt S6-UCSPITLSC 1
+.Dd September 29, 2021
+.Dt S6-UCSPITLSC 8
 .Os
 .Sh NAME
 .Nm s6-ucspitlsc
@@ -41,7 +41,7 @@ can send a command to its control socket provided by
 .Nm ,
 following the UCSPI-TLS[1] protocol.
 Then the s6-ucspitlsc child will exec into an
-.Xr s6-tlsc-io 1
+.Xr s6-tlsc-io 8
 process that will initiate the TLS connection, perform the handshake
 (expecting a TLS server on the other side of the network) and maintain
 a TLS tunnel.
@@ -54,7 +54,7 @@ program
 knows and understands the UCSPI-TLS[1] protocol for opportunistic TLS.
 If it does not, you will not be able to secure your connection, and
 what you need is a regular immediate TLS program instead, which means
-.Xr s6-tlsc 1 .
+.Xr s6-tlsc 8 .
 .Sh OPTIONS
 .Bl -tag -width x
 .It Fl v Ar verbosity
@@ -65,14 +65,14 @@ is 1.
 0 is quiet, 2 is verbose, more than 2 is debug output.
 .It Fl Z
 Do not clean the environment of the variables used by
-.Xr s6-tlsc-io 1
+.Xr s6-tlsc-io 8
 before
 .Xr exec 3 Ap
 ing
 .Ar prog... .
 .It Fl z
 Clean the environment of the variables used by
-.Xr s6-tlsc-io 1
+.Xr s6-tlsc-io 8
 before
 .Xr exec 3 Ap
 ing
@@ -127,7 +127,7 @@ Default is 7.
 .Nm
 does not expect to have any particular environment variables, but it
 spawns a
-.Xr s6-tlsc-io 1
+.Xr s6-tlsc-io 8
 program that does.
 So it should pay attention to the following variables:
 .Bl -bullet -width x
@@ -160,7 +160,7 @@ is run with all these variables
 and
 .Ev TLS_GID .
 They're passed to the
-.Xr s6-tlsc-io 1
+.Xr s6-tlsc-io 8
 child but not to
 .Ar prog... .
 The
@@ -207,18 +207,18 @@ Normally the parent
 process execs into
 .Ar prog...
 and the child process execs into
-.Xr s6-tlsc-io 1 .
+.Xr s6-tlsc-io 8 .
 If the parent dies or closes its control socket before sending a
 command to start TLS, the child exits 0.
 .Sh SEE ALSO
-.Xr s6-tlsc 1 ,
-.Xr s6-tlsc-io 1 ,
-.Xr s6-tlsclient 1 ,
-.Xr s6-tlsd 1 ,
-.Xr s6-tlsd-io 1 ,
-.Xr s6-tlsserver 1 ,
-.Xr s6-ucspitlsd 1 ,
-.Xr s6-tls 7
+.Xr s6-tls 7 ,
+.Xr s6-tlsc 8 ,
+.Xr s6-tlsc-io 8 ,
+.Xr s6-tlsclient 8 ,
+.Xr s6-tlsd 8 ,
+.Xr s6-tlsd-io 8 ,
+.Xr s6-tlsserver 8 ,
+.Xr s6-ucspitlsd 8
 .Pp
 [1]
 .Lk https://web.archive.org/web/20150311223933/http://www.suspectclass.com/sgifford/ucspi-tls/ucspi-tls.txt

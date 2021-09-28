@@ -1,5 +1,5 @@
-.Dd February 16, 2021
-.Dt S6-TAICLOCK 1
+.Dd September 29, 2021
+.Dt S6-TAICLOCK 8
 .Os
 .Sh NAME
 .Nm s6-taiclock
@@ -23,7 +23,7 @@ and outputs it on stdout.
 .Pp
 .Nm
 exchanges TAICLOCK messages with a server such as
-.Xr s6-taiclockd 1
+.Xr s6-taiclockd 8
 listening on
 .Ar ipaddress ,
 UDP port 4014.
@@ -35,9 +35,9 @@ system clock and the one given by the server.
 .Pp
 It prints the difference to stdout in a format understood
 by
-.Xr s6-clockadd 1
+.Xr s6-clockadd 8
 and
-.Xr s6-clockview 1 .
+.Xr s6-clockview 8 .
 It then exits 0.
 .Ss On the usage of NTP vs. TAICLOCK
 TAICLOCK is not as generic or failproof as NTP.
@@ -57,13 +57,13 @@ expectations are not too strict.
 .Pp
 TAICLOCK is much easier to implement.
 The
-.Xr s6-sntpclock 1
+.Xr s6-sntpclock 8
 client binary code (statically linked on a i386) is 50% bigger than
 the
 .Nm
 client.
 Also, the
-.Xr s6-taiclockd 1
+.Xr s6-taiclockd 8
 server is extremely small (close to 50% smaller than the client),
 whereas NTP servers, even SNTP servers, are behemoths requiring a
 project of their own.
@@ -139,10 +139,10 @@ By default,
 is 4014.
 .El
 .Sh SEE ALSO
-.Xr s6-clockadd 1 ,
-.Xr s6-clockview 1 ,
-.Xr s6-sntpclock 1 ,
-.Xr s6-taiclockd 1
+.Xr s6-clockadd 8 ,
+.Xr s6-clockview 8 ,
+.Xr s6-sntpclock 8 ,
+.Xr s6-taiclockd 8
 .Pp
 [1]
 .Lk https://cr.yp.to/proto/taiclock.txt

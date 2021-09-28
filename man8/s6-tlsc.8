@@ -1,5 +1,5 @@
-.Dd September 28, 2021
-.Dt S6-TLSC 1
+.Dd September 29, 2021
+.Dt S6-TLSC 8
 .Os
 .Sh NAME
 .Nm s6-tlsc
@@ -26,13 +26,13 @@ expects to have an open TCP connection it can talk to on its (by
 default) descriptors 6 (for reading) and 7 (for writing).
 .Pp
 It spawns an
-.Xr s6-tlsc-io 1
+.Xr s6-tlsc-io 8
 child process that will initiate the TLS connection, perform the
 handshake (expecting a TLS server on the other side of the network)
 and maintain the TLS tunnel.
 .Pp
 When notified by
-.Xr s6-tlsc-io 1
+.Xr s6-tlsc-io 8
 that the handshake has completed,
 .Nm
 .Xr exec 3 Ns
@@ -44,7 +44,7 @@ The goal of the
 interface
 .Po
 and its server-side companion
-.Xr s6-tlsd 1
+.Xr s6-tlsd 8
 .Pc
 is to
 make it so that if you have a client, run by the command line
@@ -70,14 +70,14 @@ is 1.
 This option currently has no effect.
 .It Fl Z
 Do not clean the environment of the variables used by
-.Xr s6-tlsc-io 1
+.Xr s6-tlsc-io 8
 before
 .Xr exec 3 Ap
 ing
 .Ar prog... .
 .It Fl z
 Clean the environment of the variables used by
-.Xr s6-tlsc-io 1
+.Xr s6-tlsc-io 8
 before
 .Xr exec 3 Ap
 ing
@@ -131,7 +131,7 @@ Default is 7.
 .Ss Read
 .Nm
 does not expect to have any particular environment variables, but it spawns an
-.Xr s6-tlsc-io 1
+.Xr s6-tlsc-io 8
 program that does.
 So it should pay attention to the following variables:
 .Bl -bullet -width x
@@ -162,7 +162,7 @@ is run with all these variables
 and
 .Ev TLS_GID .
 They're passed to the
-.Xr s6-tlsc-io 1
+.Xr s6-tlsc-io 8
 child but not to
 .Ar prog... .
 The
@@ -216,14 +216,14 @@ s into
 .Ar prog...
 instead.
 .Sh SEE ALSO
-.Xr s6-tlsc-io 1 ,
-.Xr s6-tlsclient 1 ,
-.Xr s6-tlsd 1 ,
-.Xr s6-tlsd-io 1 ,
-.Xr s6-tlsserver 1 ,
-.Xr s6-ucspitlsc 1 ,
-.Xr s6-ucspitlsd 1 ,
-.Xr s6-tls 7
+.Xr s6-tls 7 ,
+.Xr s6-tlsc-io 8 ,
+.Xr s6-tlsclient 8 ,
+.Xr s6-tlsd 8 ,
+.Xr s6-tlsd-io 8 ,
+.Xr s6-tlsserver 8 ,
+.Xr s6-ucspitlsc 8 ,
+.Xr s6-ucspitlsd 8
 .Pp
 This man page is ported from the authoritative documentation at:
 .Lk https://skarnet.org/software/s6-networking/s6-tlsc.html
