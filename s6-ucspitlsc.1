@@ -1,4 +1,4 @@
-.Dd February 16, 2021
+.Dd September 28, 2021
 .Dt S6-UCSPITLSC 1
 .Os
 .Sh NAME
@@ -63,7 +63,6 @@ Default for
 .Ar verbosity
 is 1.
 0 is quiet, 2 is verbose, more than 2 is debug output.
-This option currently has no effect.
 .It Fl Z
 Do not clean the environment of the variables used by
 .Xr s6-tlsc-io 1
@@ -135,18 +134,18 @@ So it should pay attention to the following variables:
 .It
 .Ev CADIR
 or
-.Ev CAFILE
+.Ev CAFILE .
 .It
 (If the
 .Fl y
 option has been given)
 .Ev CERTFILE
 and
-.Ev KEYFILE
+.Ev KEYFILE .
 .It
 .Ev TLS_UID
 and
-.Ev TLS_GID
+.Ev TLS_GID .
 .El
 .Ss Written
 By default,

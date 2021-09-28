@@ -1,4 +1,4 @@
-.Dd February 16, 2021
+.Dd September 28, 2021
 .Dt S6-UCSPITLSD 1
 .Os
 .Sh NAME
@@ -12,7 +12,8 @@ then execs into an application
 .Op Fl Y | Fl y
 .Op Fl Z | Fl z
 .Op Fl v Ar verbosity
-.Op FL K Ar kimeout
+.Op Fl K Ar kimeout
+.Op Fl k Ar snilevel
 .Op --
 .Ar prog...
 .Sh DESCRIPTION
@@ -65,7 +66,6 @@ Default for
 .Ar verbosity
 is 1.
 0 is quiet, 2 is verbose, more than 2 is debug output.
-This option currently has no effect.
 .It Fl Z
 Do not clean the environment of the variables used by
 .Xr s6-tlsc-io 1
@@ -106,6 +106,38 @@ Close the connection if the handshake takes more than
 milliseconds to complete.
 The default is 0, which means infinite timeout: let the handshake
 complete at its own pace, no matter how slow.
+.It Fl k Ar snilevel
+Support alternative certificate chains for SNI.
+If
+.Ar snilevel
+is nonzero, private key file names are read from every environment
+variable of the form
+.Ev KEYFILE\&: Ns Ar x ,
+where
+.Ar x
+is a server name that the client may require, and a corresponding
+certificate chain for the name
+.Ar x
+should exist in the file named after the contents of the
+.Ev CERTFILE\&: Ns Ar x
+environment variable.
+If
+.Ar snilevel
+is 2 or more,
+.Em only
+those files are read, and the generic
+.Ev KEYFILE
+and
+.Ev CERTFILE
+variables are ignored.
+If
+.Ar snilevel
+is 0, or if the option is not given, which is the default,
+.Ev KEYFILE
+and
+.Ev CERTFILE
+are the only private key / certificate chain pair that are loaded, no
+other environment variable is read for keypairs.
 .El
 .Sh ENVIRONMENT
 .Ss Read
@@ -119,7 +151,16 @@ So it should pay attention to the following variables:
 .It
 .Ev CERTFILE
 and
-.Ev KEYFILE
+.Ev KEYFILE .
+Also (or alternatively), if the
+.Fl k
+option is given: a series of
+.Ev KEYFILE\&: Ns Ar x
+and
+.Ev CERTFILE\&: Ns Ar x
+variables, for every
+.Ar x
+in the set of server names.
 .It
 (If the
 .Fl Y
@@ -128,11 +169,11 @@ or
 option has been given)
 .Ev CADIR
 or
-.Ev CAFILE
+.Ev CAFILE .
 .It
 .Ev TLS_UID
 and
-.Ev TLS_GID
+.Ev TLS_GID .
 .El
 .Ss Written
 By default,
@@ -143,16 +184,21 @@ is run with all these variables
 .Ev CAFILE ,
 .Ev KEYFILE ,
 .Ev CERTFILE ,
+.Ev KEYFILE\&: Ns Ar x
+and
+.Ev CERTFILE\&: Ns Ar x
+for every
+.Ar x ,
 .Ev TLS_UID
 and
 .Ev TLS_GID .
-They're passed to the
+The variables are passed to the
 .Xr s6-tlsd-io 1
 child but not to
 .Ar prog... .
 The
 .Fl Z
-option prevents that behaviour.
+option prevents that behaviour and keeps them accessible in the child.
 .Pp
 However,
 .Ar prog...

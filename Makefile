@@ -3,7 +3,6 @@ man1 = $(MANPATH)/man1/
 man7 = $(MANPATH)/man7/
 
 man1_targets = \
-	minidentd.1 \
 	s6-clockadd.1 \
 	s6-clockview.1 \
 	s6-getservbyname.1 \

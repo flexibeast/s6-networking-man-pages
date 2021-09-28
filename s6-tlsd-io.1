@@ -1,4 +1,4 @@
-.Dd February 16, 2021
+.Dd September 28, 2021
 .Dt S6-TLSD-IO 1
 .Os
 .Sh NAME
@@ -10,8 +10,9 @@ communicate with an existing local program over already established pipes
 .Op Fl S | Fl s
 .Op Fl Y | Fl y
 .Op Fl v Ar verbosity
-.Op Fl K kimeout
-.Op Fl d notif
+.Op Fl K Ar kimeout
+.Op Fl k Ar snilevel
+.Op Fl d Ar notif
 .Op --
 .Ar fdr
 .Ar fdw
@@ -134,16 +135,52 @@ Transmit EOF by half-closing the TCP connection without using
 .Ql close_notify .
 This is the default.
 .It Fl Y
-Do not send a client certificate.
-This is the default.
+Require an optional client certificate.
 .It Fl y
-Send a client certificate.
+Require a mandatory client certificate.
+The default, with neither the
+.Fl Y
+nor the
+.Fl y
+option, is not to require a client certificate at all.
 .It Fl K Ar kimeout
 If the peer fails to send data for
 .Ar kimeout
 milliseconds during the handshake, close the connection.
 The default is 0, which means infinite timeout (never kill the
 connection).
+.It Fl k Ar snilevel
+Support alternative certificate chains for SNI.
+If
+.Ar snilevel
+is nonzero, private key file names are read from every environment
+variable of the form
+.Ev KEYFILE\&: Ns Ar x ,
+where
+.Ar x
+is a server name that the client may require, and a corresponding
+certificate chain for the name
+.Ar x
+should exist in the file named after the contents of the
+.Ev CERTFILE\&: Ns Ar x
+environment variable.
+If
+.Ar snilevel
+is 2 or more,
+.Em only
+those files are read, and the generic
+.Ev KEYFILE
+and
+.Ev CERTFILE
+variables are ignored.
+If
+.Ar snilevel
+is 0, or if the option is not given, which is the default,
+.Ev KEYFILE
+and
+.Ev CERTFILE
+are the only private key / certificate chain pair that are loaded, no
+other environment variable is read for keypairs.
 .It Fl d Ar notif
 Handshake notification.
 .Ar notif
@@ -172,7 +209,7 @@ expects to have the following environment variables set:
 A path to the file containing the server's private key, DER- or
 PEM-encoded.
 .It Ev CERTFILE
-A path to the file containing the server's certificate, DER- or
+A path to the file containing the server's certificate chain, DER- or
 PEM-encoded.
 If PEM-encoded, the file can actually contain a chain of certificates.
 .El
@@ -180,6 +217,24 @@ If PEM-encoded, the file can actually contain a chain of certificates.
 If one of those variables is unset,
 .Nm
 will refuse to run.
+.Pp
+Alternatively, if
+.Ar snilevel
+is nonzero, the private key for the server named
+.Ar x
+should be held in a file whose name is contained in the
+.Ev KEYFILE\&: Ns Ar x
+environment variable, and the corresponding certificate chain file
+should be named in the
+.Ev CERTFILE\&: Ns Ar x
+environment variable.
+If
+.Ar snilevel
+is 2 or more, the
+.Ev KEYFILE
+and
+.Ev CERTFILE
+variables will be entirely ignored.
 .Pp
 If you are using client certificates,
 .Nm

@@ -1,4 +1,4 @@
-.Dd April 22, 2021
+.Dd September 28, 2021
 .Dt S6-TLSD 1
 .Os
 .Sh NAME
@@ -10,7 +10,8 @@
 .Op Fl Y | Fl y
 .Op Fl Z | Fl z
 .Op Fl v Ar verbosity
-.Op Fl K Ar kimeout ]
+.Op Fl K Ar kimeout
+.Op Fl k Ar snilevel
 .Op --
 .Ar prog...
 .Sh DESCRIPTION
@@ -112,6 +113,38 @@ If the peer fails to send data for
 milliseconds during the handshake, close the connection.
 The default is 0, which means infinite timeout (never kill the
 connection).
+.It Fl k Ar snilevel
+Support alternative certificate chains for SNI.
+If
+.Ar snilevel
+is nonzero, private key file names are read from every environment
+variable of the form
+.Ev KEYFILE\&: Ns Ar x ,
+where
+.Ar x
+is a server name that the client may require, and a corresponding
+certificate chain for the name
+.Ar x
+should exist in the file named after the contents of the
+.Ev CERTFILE\&: Ns Ar x
+environment variable.
+If
+.Ar snilevel
+is 2 or more,
+.Em only
+those files are read, and the generic
+.Ev KEYFILE
+and
+.Ev CERTFILE
+variables are ignored.
+If
+.Ar snilevel
+is 0, or if the option is not given, which is the default,
+.Ev KEYFILE
+and
+.Ev CERTFILE
+are the only private key / certificate chain pair that are loaded, no
+other environment variable is read for keypairs.
 .El
 .Sh ENVIRONMENT
 .Ss Read
@@ -125,7 +158,16 @@ So it should pay attention to the following variables:
 .It
 .Ev KEYFILE
 and
-.Ev CERTFILE
+.Ev CERTFILE .
+Also (or alternatively), if the
+.Fl k
+option is given: a series of
+.Ev KEYFILE\&: Ns Ar x
+and
+.Ev CERTFILE\&: Ns Ar x
+variables, for every
+.Ar x
+in the set of server names.
 .It
 (If the
 .Fl y
@@ -134,11 +176,11 @@ or
 option has been given)
 .Ev CADIR
 or
-.Ev CAFILE
+.Ev CAFILE .
 .It
 .Ev TLS_UID
 and
-.Ev TLS_GID
+.Ev TLS_GID .
 .El
 .Ss Written
 By default,
@@ -149,6 +191,11 @@ is run with all these variables
 .Ev CAFILE ,
 .Ev KEYFILE ,
 .Ev CERTFILE ,
+.Ev KEYFILE\&: Ns Ar x
+and
+.Ev CERTFILE\&: Ns Ar x
+for every
+.Ar x ,
 .Ev TLS_UID
 and
 .Ev TLS_GID .
@@ -158,7 +205,7 @@ child but not to
 .Ar prog... .
 The
 .Fl Z
-option prevents that behaviour.
+option prevents that behaviour and keeps them accessible in the child.
 .Pp
 However,
 .Ar prog...
@@ -172,6 +219,19 @@ Contains the name of the cipher used.
 Contains the required SNI server name, if any.
 It is removed from the environment if no SNI has been sent by the
 client.
+.It Ev SSL_PEER_CERT_HASH
+Contains the hash of the peer's End Entity certificate, prefixed by
+the name of the hash and a colon
+.Po
+typically
+.Ql SHA256\&:
+.Pc .
+.It Ev SSL_PEER_CERT_SUBJECT
+Contains the decoded subjectDN of the peer's End Entity certificate,
+i.e. identifying information.
+What is traditionally called the
+.Dq name
+of the certificate is the CN field in that data.
 .El
 .Pp
 More similar environment variables containing information about the

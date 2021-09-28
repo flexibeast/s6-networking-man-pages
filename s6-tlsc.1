@@ -1,4 +1,4 @@
-.Dd April 22, 2021
+.Dd September 28, 2021
 .Dt S6-TLSC 1
 .Os
 .Sh NAME
@@ -183,6 +183,19 @@ Contains
 if the
 .Fl k
 option has been given; otherwise it is removed from the environment.
+.It Ev SSL_PEER_CERT_HASH
+Contains the hash of the peer's End Entity certificate, prefixed by
+the name of the hash and a colon
+.Po
+typically
+.Ql SHA256\&:
+.Pc .
+.It Ev SSL_PEER_CERT_SUBJECT
+Contains the decoded subjectDN of the peer's End Entity certificate,
+i.e. identifying information.
+What is traditionally called the
+.Dq name
+of the certificate is the CN field in that data.
 .El
 .Pp
 More similar environment variables containing information about the
