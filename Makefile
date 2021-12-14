@@ -1,6 +1,8 @@
-MANPATH ?= /usr/share/man
-man7 = $(MANPATH)/man7/
-man8 = $(MANPATH)/man8/
+DESTDIR  =
+PREFIX   = /usr
+MANPATH ?= $(PREFIX)/share/man
+man7_dir = $(MANPATH)/man7
+man8_dir = $(MANPATH)/man8
 
 man7_targets = \
 	s6-tls.7
@@ -31,15 +33,15 @@ man8_targets = \
 	s6-ucspitlsc.8 \
 	s6-ucspitlsd.8
 
-
-all: install
+all:
+	@echo "Nothing to be done. Ready for 'make install'."
 
 install:
-	cd man7; install -D -m 644 -t $(man7) $(man7_targets)
-	cd man8; install -D -m 644 -t $(man8) $(man8_targets)
+	cd man7; install -D -m 0644 -t ${DESTDIR}${man7_dir} $(man7_targets)
+	cd man8; install -D -m 0644 -t ${DESTDIR}${man8_dir} $(man8_targets)
 
 uninstall:
-	cd $(man7); rm -f $(man7_targets)
-	cd $(man8); rm -f $(man8_targets)
+	cd $(man7_dir); rm -f $(man7_targets)
+	cd $(man8_dir); rm -f $(man8_targets)
 
 .PHONY: all install uninstall
