@@ -236,6 +236,27 @@ and
 .Ev CERTFILE
 variables will be entirely ignored.
 .Pp
+You can wildcard the first level of a SNI domain: you can point to a
+valid certificate for
+.Ql Ar foo Ns .example.com
+for all values of
+.Ar foo
+via a variable called
+.Ev CERTFILE:*.example.com
+.Po
+and have the corresponding
+.Ev KEYFILE:*.example.com
+.Pc .
+Only the first level can be wildcarded, and this does not work for
+top-level domains
+.Po
+you cannot hold a certificate for
+.Ql *.com
+.Pc .
+Note: if you are using a shell to handle your environment variables,
+be careful to properly quote them so that it does not attempt to
+expand the asterisks.
+.Pp
 If you are using client certificates,
 .Nm
 also requires either one of the following variables to be set:
