@@ -1,4 +1,4 @@
-.Dd September 29, 2021
+.Dd January 15, 2023
 .Dt S6-UCSPITLSD 8
 .Os
 .Sh NAME
@@ -92,14 +92,14 @@ Transmit EOF by half-closing the TCP connection without using
 .Ql close_notify .
 This is the default.
 .It Fl Y
-Require an optional client certificate.
+Request an optional client certificate.
 .It Fl y
-Require a mandatory client certificate.
+Request a mandatory client certificate.
 The default, with neither the
 .Fl Y
 nor the
 .Fl y
-option, is not to require a client certificate at all.
+option, is not to request a client certificate at all.
 .It Fl K Ar kimeout
 Close the connection if the handshake takes more than
 .Ar kimeout

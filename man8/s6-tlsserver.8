@@ -1,4 +1,4 @@
-.Dd September 29, 2021
+.Dd January 15, 2023
 .Dt S6-TLSSERVER 8
 .Os
 .Sh NAME
@@ -278,9 +278,10 @@ s environment.
 .Sh EXAMPLES
 As root:
 .Bd -literal -offset indent
-KEYFILE=/etc/ssl/private/mykey.der CERTFILE=/etc/ssl/public/mycert.pem \\
-TLS_UID=65534 TLS_UID=65536 \\
-s6-envuidgid www s6-tlsserver -U -- 1.2.3.4 443 httpd
+env KEYFILE=/etc/ssl/private/mykey.der CERTFILE=/etc/ssl/public/mycert.pem \
+TLS_UID=65534 TLS_UID=65534 \
+s6-envuidgid www \
+s6-tlsserver -U -- 1.2.3.4 443 httpd
 .Ed
 .Pp
 This will start a server listening to 1.2.3.4 on TCP port 443, and for
